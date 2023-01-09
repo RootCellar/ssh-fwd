@@ -14,8 +14,10 @@
 #include <fcntl.h>
 #include <errno.h>
 
+#include "debug.h"
+
 // Constants
-#define PORT 8080
+#define PORT 8090
 
 
 int main(int argc, char const *argv[])
