@@ -40,8 +40,7 @@ int create_server_socket(int port) {
   }
 
   // Make server socket non-blocking
-  int flags = fcntl(server_fd, F_GETFL, 0);
-  fcntl(server_fd, F_SETFL, flags | O_NONBLOCK);
+  setup_fd(server_fd);
 
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
