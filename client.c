@@ -155,7 +155,7 @@ int main(int argc, char const *argv[])
           exit(EXIT_FAILURE);
         }
         else {
-          printf("From SSH Server: %s\n", buffer);
+          //printf("From SSH Server: %s\n", buffer);
           if(fwd_sock < 0) {
 
           }

@@ -19,6 +19,11 @@ void sendData(int fd, char* data, int count) {
   while (sent < count) {
       j = write(fd, data + sent, count - sent);
 
+      if(j < 0) {
+        perror("write loop\n");
+        break;
+      }
+
       //if (j == -1) {
       //    DIE("write"); // TODO is errno EPIPE
       //}

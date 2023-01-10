@@ -81,8 +81,12 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
       exit(EXIT_FAILURE);
     }
     else {
-      buffer[len-1] = 0;
-      printf("Client %d: %s\n", i, buffer);
+      //buffer[len-1] = 0;
+      //printf("Client %d: %s\n", i, buffer);
+      client_forwarded_fd = clients[i].forwarded_fd;
+      if(client_forwarded_fd >= 0) {
+        sendData(client_forwarded_fd, buffer, len);
+      }
     }
 
     client_forwarded_fd = clients[i].forwarded_fd;
