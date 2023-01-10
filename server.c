@@ -13,6 +13,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <signal.h>
 
 #include "debug.h"
 #include "util.h"
@@ -39,7 +40,7 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
     if(client_fd < 0) {
       continue;
     }
-    debug_printf("reading %d\n", i);
+    //debug_printf("reading %d\n", i);
     errno = 0;
     len = read(client_fd, buffer, BUFFER_SIZE);
     if(errno == EAGAIN) continue;
@@ -59,7 +60,7 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
     }
     else {
       buffer[len-1] = 0;
-      printf("Client 1: %s\n", buffer);
+      printf("Client %d: %s\n", i, buffer);
     }
   }
 }
@@ -72,7 +73,7 @@ int find_empty_client_slot(struct client_data* clients) {
   return -1;
 }
 
-int create_server_socket(int port) {
+int create_server_socket(int port, int retry) {
   int server_fd;
   struct sockaddr_in address;
   int addrlen = sizeof(address);
@@ -83,12 +84,14 @@ int create_server_socket(int port) {
 
   server_fd = socket(AF_INET, SOCK_STREAM, 0);
   if(server_fd <= 0) {
+    perror("Could not create server socket");
     return -1;
   }
 
   // set socket options
-  result = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+  result = setsockopt(server_fd, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt));
   if(result) {
+    perror("Could not create server socket");
     return -1;
   }
 
@@ -97,10 +100,20 @@ int create_server_socket(int port) {
 
   address.sin_family = AF_INET;
   address.sin_addr.s_addr = INADDR_ANY;
-  address.sin_port = htons( PORT );
+  address.sin_port = htons( port );
 
-  result = bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+  debug_print("Binding server socket...\n");
+
+  if(retry) result = -1;
+  while(retry && result < 0) {
+    result = bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+    //perror("bind");
+    usleep(1000000);
+  }
+
   if(result < 0) { return -1; }
+
+  debug_print("Enabling listen...\n");
 
   result = listen(server_fd, 3);
   if(result < 0) { return -1; }
@@ -108,6 +121,14 @@ int create_server_socket(int port) {
   errno = 0;
 
   return server_fd;
+}
+
+void sigHandler(int sigNum)
+{
+  if(sigNum == SIGINT) {
+    printf("\n\nReceived SIGINT\n\n");
+    exit(0);
+  }
 }
 
 int main(int argc, char const *argv[])
@@ -130,15 +151,15 @@ int main(int argc, char const *argv[])
   char *clientsFull = "Sorry, no more clients can join!\n";
   char *needOther = "Only one client is connected!\n";
 
-  server_fd = create_server_socket(PORT);
+  server_fd = create_server_socket(PORT, 1);
   if(server_fd < 0) {
     perror("Could not create main server socket");
     exit(1);
   }
 
   int newSocket = -1;
-  int client1 = -1;
-  int client2 = -1;
+
+  signal(SIGINT, sigHandler);
 
   while(1) {
 
@@ -146,8 +167,13 @@ int main(int argc, char const *argv[])
 
     errno = 0;
     newSocket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+    //debug_print("accept\n");
     if(errno == EAGAIN) {
       //continue...
+    }
+    else if(errno != 0) {
+      perror("Accept failed");
+      exit(EXIT_FAILURE);
     }
     else if(newSocket >= 0) {
 
@@ -161,16 +187,17 @@ int main(int argc, char const *argv[])
       else {
         debug_printf("Found empty spot for client in %d\n", spot);
         setup_fd(newSocket);
-        clients[spot].connection_fd = newSocket;
 
         debug_print("Attempting to make listen socket for client\n");
         int port = PORT + (spot+1);
-        int newServerSocket = create_server_socket(port);
+        int newServerSocket = create_server_socket(port, 0);
         if(newServerSocket < 0) {
           debug_print("Server socket creation failed\n");
+          close(newSocket);
         }
         else {
           clients[spot].listen_fd = newServerSocket;
+          clients[spot].connection_fd = newSocket;
           debug_printf("Client listen socket on %d created.\n", port);
         }
       }
@@ -183,7 +210,7 @@ int main(int argc, char const *argv[])
 
     handle_client_connections(clients, buffer);
 
-    usleep(100000);
+    usleep(1000);
   }
 
   return 0;
