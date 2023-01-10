@@ -45,11 +45,15 @@ int main(int argc, char const *argv[])
         return -1;
     }
 
+    debug_print("Connecting to host\n");
+
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
         perror("Connection Failed");
         return -1;
     }
+
+    debug_print("Connected\n");
 
     // Make stdin non-blocking
     int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
