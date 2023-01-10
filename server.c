@@ -28,31 +28,53 @@
 struct client_data {
   int connection_fd;
   int listen_fd;
+  int forwarded_fd;
 };
 
 // Server-specific functions
 
+void close_fd(struct client_data* clients, int id) {
+  if(clients[id].connection_fd > 0) {
+    debug_printf("Disconnecting client %d...\n", id);
+    close(clients[id].listen_fd);
+  }
+  if(clients[id].listen_fd > 0) {
+    debug_print("Client had forward socket, closing...\n");
+    close(clients[id].listen_fd);
+  }
+  if(clients[id].forwarded_fd > 0) {
+    debug_print("Client had forwarded connection, closing...\n");
+    close(clients[id].forwarded_fd);
+  }
+
+  clients[id].connection_fd = -1;
+  clients[id].listen_fd = -1;
+  clients[id].forwarded_fd = -1;
+}
+
+void close_forward(struct client_data* clients, int id) {
+  debug_printf("Closing forwarded socket for client %d\n", id);
+  if(clients[id].forwarded_fd > 0) {
+    close(clients[id].forwarded_fd);
+  }
+  clients[id].forwarded_fd = -1;
+}
+
 void handle_client_connections(struct client_data* clients, char* buffer) {
   int len;
-  int client_fd;
+  int client_fd, client_forwarded_fd;
   for(int i = 0; i < CLIENT_LIST_SIZE; i++) {
     client_fd = clients[i].connection_fd;
-    if(client_fd < 0) {
-      continue;
-    }
+    if(client_fd < 0) continue;
     //debug_printf("reading %d\n", i);
     errno = 0;
     len = read(client_fd, buffer, BUFFER_SIZE);
-    if(errno == EAGAIN) continue;
+    if(errno == EAGAIN) {
+      // Nothing
+    }
     else if(len == 0) {
       debug_printf("Client %d disconnected.\n", i);
-      close(client_fd);
-      if(clients[i].listen_fd > 0) {
-        debug_print("Client had forward socket, closing...\n");
-        close(clients[i].listen_fd);
-      }
-      clients[i].connection_fd = -1;
-      clients[i].listen_fd = -1;
+      close_fd(clients, i);
     }
     else if(errno != 0) {
       perror("error on read");
@@ -62,6 +84,30 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
       buffer[len-1] = 0;
       printf("Client %d: %s\n", i, buffer);
     }
+
+    client_forwarded_fd = clients[i].forwarded_fd;
+    if(client_forwarded_fd < 0) continue;
+
+    //debug_print("forward listen\n");
+
+    errno = 0;
+    len = read(client_forwarded_fd, buffer, BUFFER_SIZE);
+    if(errno == EAGAIN) {
+      // Nothing
+    }
+    else if(len == 0) {
+      debug_printf("Client %d disconnected from forward.\n", i);
+      close_forward(clients, i);
+    }
+    else if(errno != 0) {
+      perror("error on read");
+      exit(EXIT_FAILURE);
+    }
+    else {
+      debug_print("Forwarding data to client\n");
+      sendData(client_fd, buffer, len);
+    }
+
   }
 }
 
@@ -104,11 +150,16 @@ int create_server_socket(int port, int retry) {
 
   debug_print("Binding server socket...\n");
 
-  if(retry) result = -1;
-  while(retry && result < 0) {
+  if(retry) {
+    result = -1;
+    while(retry && result < 0) {
+      result = bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+      usleep(1000000);
+    }
+  }
+  else {
     result = bind(server_fd, (struct sockaddr *)&address, sizeof(address));
-    //perror("bind");
-    usleep(1000000);
+    perror("bind");
   }
 
   if(result < 0) { return -1; }
@@ -145,6 +196,7 @@ int main(int argc, char const *argv[])
   for(int i = 0; i < CLIENT_LIST_SIZE; i++) {
     clients[i].connection_fd = -1;
     clients[i].listen_fd = -1;
+    clients[i].forwarded_fd = -1;
   }
 
   //String constants
@@ -206,6 +258,43 @@ int main(int argc, char const *argv[])
     else {
       perror("accept failed");
       exit(EXIT_FAILURE);
+    }
+
+    // Accept forwarded connections for each client's server socket
+
+    int client_fd;
+    for(int i = 0; i < CLIENT_LIST_SIZE; i++) {
+      errno = 0;
+      client_fd = clients[i].listen_fd;
+      if(client_fd < 0) continue;
+      newSocket = accept(client_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+      //debug_print("accept\n");
+      if(errno == EAGAIN) {
+        //continue...
+      }
+      else if(errno != 0) {
+        perror("Accept failed");
+        exit(EXIT_FAILURE);
+      }
+      else if(newSocket >= 0) {
+
+        setup_fd(newSocket);
+
+        if(clients[i].forwarded_fd < 0) {
+          clients[i].forwarded_fd = newSocket;
+          debug_printf("Accepted a new forwarded connection %d\n", newSocket);
+          sendString(clients[i].connection_fd, "connect");
+        }
+        else {
+          close(newSocket);
+          debug_print("Rejected a forwarded connection\n");
+        }
+
+      }
+      else {
+        perror("accept failed");
+        exit(EXIT_FAILURE);
+      }
     }
 
     handle_client_connections(clients, buffer);
