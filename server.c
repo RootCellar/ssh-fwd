@@ -15,10 +15,46 @@
 #include <errno.h>
 
 #include "debug.h"
+#include "util.h"
 
 // Constants
 #define PORT 8090
+#define BUFFER_SIZE 16384
 
+int create_server_socket(int port) {
+  int server_fd;
+  struct sockaddr_in address;
+  int addrlen = sizeof(address);
+  int opt = 1;
+  int result = 0;
+
+  server_fd = socket(AF_INET, SOCK_STREAM, 0);
+  if(server_fd <= 0) {
+    return -1;
+  }
+
+  // set socket options
+  result = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt, sizeof(opt));
+  if(result) {
+    return -1;
+  }
+
+  // Make server socket non-blocking
+  int flags = fcntl(server_fd, F_GETFL, 0);
+  fcntl(server_fd, F_SETFL, flags | O_NONBLOCK);
+
+  address.sin_family = AF_INET;
+  address.sin_addr.s_addr = INADDR_ANY;
+  address.sin_port = htons( PORT );
+
+  result = bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+  if(result < 0) { return -1; }
+
+  result = listen(server_fd, 3);
+  if(result < 0) { return -1; }
+
+  return server_fd;
+}
 
 int main(int argc, char const *argv[])
 {
@@ -26,13 +62,14 @@ int main(int argc, char const *argv[])
   struct sockaddr_in address;
   int opt = 1;
   int addrlen = sizeof(address);
-  char buffer[2048] = {0};
+  char buffer[BUFFER_SIZE] = {0};
   char *string;
 
   //String constants
   char *clientsFull = "Sorry, no more clients can join!\n";
   char *needOther = "Only one client is connected!\n";
 
+  /*
   // Creating socket file descriptor
   if ((server_fd = socket(AF_INET, SOCK_STREAM, 0)) == 0)
   {
@@ -68,6 +105,13 @@ int main(int argc, char const *argv[])
       perror("listen failed");
       exit(EXIT_FAILURE);
     }
+    */
+
+    server_fd = create_server_socket(PORT);
+    if(server_fd < 0) {
+      perror("Could not create main server socket");
+      exit(1);
+    }
 
     int newSocket = -1;
     int client1 = -1;
@@ -84,8 +128,7 @@ int main(int argc, char const *argv[])
       }
       else if(newSocket >= 0) {
         // make the file descriptor for the newSocket non-blocking
-        int flags = fcntl(newSocket, F_GETFL, 0);
-        fcntl(newSocket, F_SETFL, flags | O_NONBLOCK);
+        setup_fd(newSocket);
 
         // If we're missing a client, take this newSocket in
         if(client1 < 0) {
@@ -113,7 +156,7 @@ int main(int argc, char const *argv[])
       if(client1 > 0) {
 
         errno = 0;
-        int len = read(client1, buffer, 2048);
+        int len = read(client1, buffer, BUFFER_SIZE);
 
         if(errno == EAGAIN) {
           // No data, continue...
@@ -155,7 +198,7 @@ int main(int argc, char const *argv[])
       if(client2 > 0) {
 
         errno = 0;
-        int len = read(client2, buffer, 2048);
+        int len = read(client2, buffer, BUFFER_SIZE);
 
         if(errno == EAGAIN) {
           // No data, continue...

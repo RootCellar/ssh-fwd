@@ -15,9 +15,11 @@
 #include <errno.h>
 
 #include "debug.h"
+#include "util.h"
 
 // Constants
 #define PORT 8090
+#define BUFFER_SIZE 4096
 
 
 int main(int argc, char const *argv[])
@@ -25,11 +27,11 @@ int main(int argc, char const *argv[])
     int sock = 0, valread;
     struct sockaddr_in serv_addr;
     char *string = "hello";
-    char buffer[2048] = {0};
+    char buffer[BUFFER_SIZE] = {0};
 
     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
     {
-        printf("\n Socket creation error \n");
+        perror("Socket creation error");
         return -1;
     }
 
@@ -39,13 +41,13 @@ int main(int argc, char const *argv[])
     // Convert IPv4 and IPv6 addresses from text to binary form
     if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
     {
-        printf("\nInvalid address/ Address not supported \n");
+        perror("Invalid address/ Address not supported");
         return -1;
     }
 
     if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
     {
-        printf("\nConnection Failed \n");
+        perror("Connection Failed");
         return -1;
     }
 
@@ -62,7 +64,7 @@ int main(int argc, char const *argv[])
       // Reset Error, attempt to read data from the socket
 
       errno = 0;
-      int len = read(sock, buffer, 2048);
+      int len = read(sock, buffer, BUFFER_SIZE);
 
       if(errno == EAGAIN) {
         // No data, continue...
@@ -87,7 +89,7 @@ int main(int argc, char const *argv[])
       // Reset Error, attempt to read from STDIN
 
       errno = 0;
-      len = read(STDIN_FILENO, buffer, 2048);
+      len = read(STDIN_FILENO, buffer, BUFFER_SIZE);
 
       if(errno == EAGAIN) {
         // No input, continue...
