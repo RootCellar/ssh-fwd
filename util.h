@@ -1,34 +1,8 @@
 #include "debug.h"
+#include "memory.h"
 
 #ifndef UTIL_H
 #define UTIL_H
-
-unsigned long int BYTES_ALLOCATED = 0;
-
-void* tMalloc(unsigned long int len) {
-  debug_printf("Allocating %lu bytes\n", len);
-
-  char* toRet = malloc(len);
-
-  if(toRet > 0) {
-    //BYTES_ALLOCATED += len;
-    //debug_printf("There are now %lu bytes allocated\n", BYTES_ALLOCATED);
-  }
-
-  return toRet;
-}
-
-void tFree(void* ptr){
-  if(ptr > 0) {
-    debug_print("Freeing a pointer\n");
-    //debug_printf("%lu %lu\n", sizeof ptr, sizeof *ptr);
-    //size_t len = (sizeof ptr) / (sizeof *ptr );
-    //debug_printf("Freeing %lu bytes\n", len);
-    free(ptr);
-    //BYTES_ALLOCATED -= len;
-    //debug_printf("There are now %lu bytes allocated\n", BYTES_ALLOCATED);
-  }
-}
 
 int setup_fd(int fd) {
   int flags = fcntl(fd, F_GETFL, 0);
