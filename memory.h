@@ -14,7 +14,6 @@
 
 #define DEFAULT_POINTER_LIST_SIZE 16384
 
-//unsigned long int BYTES_ALLOCATED = 0;
 struct ptr_data {
   void* ptr;
   unsigned long int size;
