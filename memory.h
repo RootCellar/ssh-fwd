@@ -1,3 +1,14 @@
+/*
+ *
+ * Darian Marvel / RootCellar
+ * 1/11/2023
+ *
+ * Memory allocator that keeps track of allocated pointers in a list.
+ * This allows allocated bytes and pointers to be kept track of,
+ * and for pointers to never really be lost.
+ *
+*/
+
 #ifndef MEMORY_H
 #define MEMORY_H
 
@@ -12,9 +23,14 @@ struct ptr_data {
 struct ptr_data* POINTER_LIST = 0;
 int POINTER_LIST_SIZE = 0;
 
+// Find the given pointer.
+// Handy trick: tFindSpot(0) can be used to find an empty slot
+// to track a new pointer
 int tFindSpot(void* ptr) {
+  debug_printf("Finding pointer %lu\n", ptr);
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
     if(POINTER_LIST[i].ptr == ptr) {
+      debug_printf("Found pointer in slot %d\n", i);
       return i;
     }
   }
@@ -22,6 +38,8 @@ int tFindSpot(void* ptr) {
   return -1;
 }
 
+// Add the given pointer, with len bytes allocated,
+// to the list of tracked pointers
 int tAdd(void* ptr, unsigned long int len) {
   if(POINTER_LIST <= 0) {
     POINTER_LIST = malloc( sizeof(struct ptr_data) * DEFAULT_POINTER_LIST_SIZE );
@@ -40,12 +58,15 @@ int tAdd(void* ptr, unsigned long int len) {
   return 0;
 }
 
+// Allocate memory for a pointer and return the pointer,
+// adding it to the tracked list if the memory allocation was successful
 void* tMalloc(unsigned long int len) {
   debug_printf("Allocating %lu bytes\n", len);
 
   void* toRet = malloc(len);
 
   if(toRet > 0) {
+    debug_printf("Successfully allocated %lu bytes\n", len);
     int failed = tAdd(toRet, len);
     if(failed) {
       debug_print("Could not add pointer to list!");
@@ -57,6 +78,8 @@ void* tMalloc(unsigned long int len) {
   return toRet;
 }
 
+// Free the given pointer and remove it from the list,
+// if it is in the list and is a valid pointer
 int tFree(void* ptr) {
 
   if(ptr <= 0) return 1; // invalid pointer
