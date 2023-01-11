@@ -22,6 +22,20 @@ struct ptr_data {
 struct ptr_data* POINTER_LIST = 0;
 int POINTER_LIST_SIZE = 0;
 
+unsigned long int tGetTotalAllocSize() {
+  unsigned long int sum = 0;
+  debug_print("Finding total size of all pointers...\n");
+
+  for(int i = 0; i < POINTER_LIST_SIZE; i++) {
+    if(POINTER_LIST[i].ptr > 0) {
+      debug_printf("Found pointer in slot %d\n", i);
+      sum += POINTER_LIST[i].size;
+    }
+  }
+
+  return sum;
+}
+
 // Find the given pointer.
 // Handy trick: tFindSpot(0) can be used to find an empty slot
 // to track a new pointer
@@ -99,6 +113,7 @@ int tFree(void* ptr) {
   free(ptr);
   ptrData->ptr = 0;
   debug_printf("Freed %lu bytes\n", ptrData->size );
+  debug_printf("There are now %lu bytes allocated!\n", tGetTotalAllocSize());
   return 0;
 }
 
