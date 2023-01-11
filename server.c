@@ -29,6 +29,8 @@ struct client_data {
   int connection_fd;
   int listen_fd;
   int forwarded_fd;
+  char* connection_buffer;
+  char* forward_buffer;
 };
 
 // Server-specific functions
@@ -50,6 +52,12 @@ void close_fd(struct client_data* clients, int id) {
   clients[id].connection_fd = -1;
   clients[id].listen_fd = -1;
   clients[id].forwarded_fd = -1;
+
+  if(clients[id].connection_buffer > 0) {
+    debug_print("Freeing message buffer...\n");
+    tFree(clients[id].connection_buffer);
+    clients[id].connection_buffer = 0;
+  }
 }
 
 void close_forward(struct client_data* clients, int id) {
@@ -242,7 +250,11 @@ int main(int argc, char const *argv[])
       }
       else {
         debug_printf("Found empty spot for client in %d\n", spot);
-        setup_fd(newSocket);
+        clients[spot].connection_buffer = setup_socket(newSocket, BUFFER_SIZE);
+        if(clients[spot].connection_buffer <= 0) {
+          debug_print("Could not allocate buffer space for the client\n");
+          close_fd(clients, spot);
+        }
 
         debug_print("Attempting to make listen socket for client\n");
         int port = PORT + (spot+1);
@@ -282,7 +294,11 @@ int main(int argc, char const *argv[])
       }
       else if(newSocket >= 0) {
 
-        setup_fd(newSocket);
+        clients[i].forward_buffer = setup_socket(newSocket, BUFFER_SIZE);
+        if(clients[i].forward_buffer <= 0) {
+          debug_print("Could not create buffer for forward connection\n");
+          close_fd(clients, i);
+        }
 
         if(clients[i].forwarded_fd < 0) {
           clients[i].forwarded_fd = newSocket;
