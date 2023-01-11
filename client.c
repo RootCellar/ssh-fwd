@@ -109,6 +109,10 @@ int main(int argc, char const *argv[])
         // socket is disconnected
         printf("Disconnected\n");
         close(sock);
+        if(fwd_sock >= 0) {
+          close(fwd_sock);
+          fwd_sock = -1;
+        }
         sock = -1;
       }
       else if (errno != 0) {
@@ -117,7 +121,7 @@ int main(int argc, char const *argv[])
         exit(EXIT_FAILURE);
       }
       else {
-        printf("From Server: %s\n", buffer);
+        //printf("From Server: %s\n", buffer);
         if(fwd_sock < 0) {
           // Parse Command
           if(strcmp(buffer,"connect") == 0) {

@@ -16,4 +16,6 @@
                                 __LINE__, __func__); } while (0)
 
 
+#define EXIT_FAIL(msg) debug_print("ERROR_FAIL"); perror("exit"); exit(1);
+
 #endif

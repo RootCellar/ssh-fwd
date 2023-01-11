@@ -78,7 +78,7 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
     }
     else if(errno != 0) {
       perror("error on read");
-      exit(EXIT_FAILURE);
+      EXIT_FAIL(EXIT_FAILURE);
     }
     else {
       //buffer[len-1] = 0;
@@ -105,10 +105,10 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
     }
     else if(errno != 0) {
       perror("error on read");
-      exit(EXIT_FAILURE);
+      EXIT_FAIL(EXIT_FAILURE);
     }
     else {
-      debug_print("Forwarding data to client\n");
+      //debug_print("Forwarding data to client\n");
       sendData(client_fd, buffer, len);
     }
 
@@ -210,7 +210,7 @@ int main(int argc, char const *argv[])
   server_fd = create_server_socket(PORT, 1);
   if(server_fd < 0) {
     perror("Could not create main server socket");
-    exit(1);
+    EXIT_FAIL(1);
   }
 
   int newSocket = -1;
@@ -229,7 +229,7 @@ int main(int argc, char const *argv[])
     }
     else if(errno != 0) {
       perror("Accept failed");
-      exit(EXIT_FAILURE);
+      EXIT_FAIL(EXIT_FAILURE);
     }
     else if(newSocket >= 0) {
 
@@ -261,7 +261,7 @@ int main(int argc, char const *argv[])
     }
     else {
       perror("accept failed");
-      exit(EXIT_FAILURE);
+      EXIT_FAIL(EXIT_FAILURE);
     }
 
     // Accept forwarded connections for each client's server socket
@@ -278,7 +278,7 @@ int main(int argc, char const *argv[])
       }
       else if(errno != 0) {
         perror("Accept failed");
-        exit(EXIT_FAILURE);
+        EXIT_FAIL(EXIT_FAILURE);
       }
       else if(newSocket >= 0) {
 
@@ -297,7 +297,7 @@ int main(int argc, char const *argv[])
       }
       else {
         perror("accept failed");
-        exit(EXIT_FAILURE);
+        EXIT_FAIL(EXIT_FAILURE);
       }
     }
 
