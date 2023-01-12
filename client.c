@@ -53,8 +53,16 @@ int create_connection(char* host, int port) {
 
 }
 
-int main(int argc, char const *argv[])
+int main(int argc, char* argv[])
 {
+
+    char* serverAddress = "127.0.0.1";
+
+    if(argc > 1) {
+      serverAddress = argv[1];
+    }
+    printf("Will connect to %s\n", serverAddress);
+
     int sock = -1, valread;
     int fwd_sock = -1;
     struct sockaddr_in serv_addr;
@@ -71,7 +79,7 @@ int main(int argc, char const *argv[])
     serv_addr.sin_port = htons(PORT);
 
     // Convert IPv4 and IPv6 addresses from text to binary form
-    if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
+    if(inet_pton(AF_INET, serverAddress, &serv_addr.sin_addr)<=0)
     {
         perror("Invalid address/ Address not supported");
         return -1;
