@@ -30,7 +30,7 @@ void sendData(int fd, char* data, int count) {
       j = write(fd, data + sent, count - sent);
 
       if(j < 0) {
-        perror("write loop\n");
+        perror("write loop");
         break;
       }
 
