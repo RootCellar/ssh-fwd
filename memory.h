@@ -92,6 +92,7 @@ void* tMalloc(unsigned long int len) {
     }
     else {
       debug_print("Successfully added pointer to list\n");
+      debug_printf("There are now %lu bytes allocated!\n", tGetTotalAllocSize());
     }
   }
 
