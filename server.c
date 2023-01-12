@@ -58,6 +58,12 @@ void close_fd(struct client_data* clients, int id) {
     tFree(clients[id].connection_buffer);
     clients[id].connection_buffer = 0;
   }
+
+  if(clients[id].forward_buffer > 0) {
+    debug_print("Freeing forward buffer...\n");
+    tFree(clients[id].forward_buffer);
+    clients[id].forward_buffer = 0;
+  }
 }
 
 void close_forward(struct client_data* clients, int id) {
@@ -312,7 +318,7 @@ int main(int argc, char const *argv[])
 
     handle_client_connections(clients, buffer);
 
-    usleep(1000);
+    usleep(10000);
   }
 
   return 0;

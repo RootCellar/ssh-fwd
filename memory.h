@@ -90,6 +90,9 @@ void* tMalloc(unsigned long int len) {
       free(toRet);
       toRet = 0;
     }
+    else {
+      debug_print("Successfully added pointer to list\n");
+    }
   }
 
   return toRet;
