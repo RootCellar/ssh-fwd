@@ -29,7 +29,7 @@ void sendData(int fd, char* data, int count) {
   while (sent < count) {
       j = write(fd, data + sent, count - sent);
 
-      sent += j;
+      if(j >= 0) sent += j;
 
       if(j < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
         perror("write loop");
