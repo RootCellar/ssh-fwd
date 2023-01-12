@@ -325,7 +325,7 @@ int main(int argc, char const *argv[])
 
     handle_client_connections(clients, buffer);
 
-    usleep(10000);
+    usleep(1000);
   }
 
   return 0;
