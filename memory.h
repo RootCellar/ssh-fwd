@@ -60,7 +60,7 @@ void tPrintStatus() {
 // Handy trick: tFindSpot(0) can be used to find an empty slot
 // to track a new pointer
 int tFindSpot(void* ptr) {
-  debug_printf("Finding pointer %lu\n", ptr);
+  debug_printf("Finding pointer %p\n", ptr);
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
     if(POINTER_LIST[i].ptr == ptr) {
       debug_printf("Found pointer in slot %d\n", i);
