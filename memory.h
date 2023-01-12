@@ -56,6 +56,10 @@ int tFindSpot(void* ptr) {
 int tAdd(void* ptr, unsigned long int len) {
   if(POINTER_LIST <= 0) {
     POINTER_LIST = malloc( sizeof(struct ptr_data) * DEFAULT_POINTER_LIST_SIZE );
+    if(POINTER_LIST <= 0) {
+      // Could not create pointer list
+      EXIT_FAIL();
+    }
     POINTER_LIST_SIZE = DEFAULT_POINTER_LIST_SIZE;
   }
 
