@@ -22,6 +22,22 @@ struct ptr_data {
 struct ptr_data* POINTER_LIST = 0;
 int POINTER_LIST_SIZE = 0;
 
+// Returns the number of allocations.
+// Could be used to see if a function leaks memory on it's own
+int tGetTotalAllocs() {
+  unsigned long int count = 0;
+  debug_print("Counting all pointers...\n");
+
+  for(int i = 0; i < POINTER_LIST_SIZE; i++) {
+    if(POINTER_LIST[i].ptr > 0) {
+      debug_printf("Found pointer in slot %d\n", i);
+      count += 1;
+    }
+  }
+
+  return count;
+}
+
 unsigned long int tGetTotalAllocSize() {
   unsigned long int sum = 0;
   debug_print("Finding total size of all pointers...\n");
@@ -34,6 +50,10 @@ unsigned long int tGetTotalAllocSize() {
   }
 
   return sum;
+}
+
+void tPrintStatus() {
+  debug_printf("There are %lu bytes allocated, amongst %d pointers.\n", tGetTotalAllocSize(), tGetTotalAllocs());
 }
 
 // Find the given pointer.
@@ -92,7 +112,7 @@ void* tMalloc(unsigned long int len) {
     }
     else {
       debug_print("Successfully added pointer to list\n");
-      debug_printf("There are now %lu bytes allocated!\n", tGetTotalAllocSize());
+      tPrintStatus();
     }
   }
 
@@ -121,7 +141,7 @@ int tFree(void* ptr) {
   free(ptr);
   ptrData->ptr = 0;
   debug_printf("Freed %lu bytes\n", ptrData->size );
-  debug_printf("There are now %lu bytes allocated!\n", tGetTotalAllocSize());
+  tPrintStatus();
   return 0;
 }
 
