@@ -77,7 +77,7 @@ void close_forward(struct client_data* clients, int id) {
     tFree(clients[id].forward_buffer);
     clients[id].forward_buffer = 0;
   }
-  
+
   clients[id].forwarded_fd = -1;
 }
 
@@ -121,7 +121,7 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
     }
     else if(len == 0) {
       debug_printf("Client %d disconnected from forward.\n", i);
-      close_forward(clients, i);
+      close_fd(clients, i);
     }
     else if(errno != 0) {
       EXIT_FAIL();
