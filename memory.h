@@ -14,7 +14,7 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#define DEFAULT_POINTER_LIST_SIZE 16384
+#define DEFAULT_POINTER_LIST_SIZE 1024
 
 struct ptr_data {
   void* ptr;
@@ -108,7 +108,7 @@ void* tMalloc(unsigned long int len) {
     debug_printf("Successfully allocated %lu bytes\n", len);
     int failed = tAdd(toRet, len);
     if(failed) {
-      debug_print("Could not add pointer to list!");
+      debug_print("Could not add pointer to list!\n");
       free(toRet);
       toRet = 0;
     }

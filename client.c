@@ -104,6 +104,7 @@ int main(int argc, char* argv[])
         fwd_sock = -1;
       }
       sock = -1;
+      exit(0);
     }
     else if (errno != 0) {
       EXIT_FAIL();

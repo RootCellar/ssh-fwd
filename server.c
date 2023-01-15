@@ -21,7 +21,7 @@
 // Constants
 #define PORT 8090
 #define BUFFER_SIZE 16384
-#define CLIENT_LIST_SIZE 1024
+#define CLIENT_LIST_SIZE 32
 
 // Structures
 
@@ -258,17 +258,20 @@ int main(int argc, char const *argv[])
           debug_print("Could not allocate buffer space for the client\n");
           close_fd(clients, spot);
         }
-
-        debug_print("Attempting to make listen socket for client\n");
-        int port = PORT + (spot+1);
-        int newServerSocket = create_server_socket(port, 0);
-        if(newServerSocket < 0) {
-          debug_print("Server socket creation failed\n");
-          close_fd(clients, spot);
-        }
         else {
-          clients[spot].listen_fd = newServerSocket;
-          debug_printf("Client listen socket on %d created.\n", port);
+
+          debug_print("Attempting to make listen socket for client\n");
+          int port = PORT + (spot+1);
+          int newServerSocket = create_server_socket(port, 0);
+          if(newServerSocket < 0) {
+            debug_print("Server socket creation failed\n");
+            close_fd(clients, spot);
+          }
+          else {
+            clients[spot].listen_fd = newServerSocket;
+            debug_printf("Client listen socket on %d created.\n", port);
+          }
+
         }
       }
 
