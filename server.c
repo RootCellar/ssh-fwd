@@ -216,16 +216,13 @@ int main(int argc, char const *argv[])
     clients[i].forwarded_fd = -1;
   }
 
-  //String constants
-  char *clientsFull = "Sorry, no more clients can join!\n";
-  char *needOther = "Only one client is connected!\n";
-
   server_fd = create_server_socket(PORT, 1);
   if(server_fd < 0) {
     EXIT_FAIL();
   }
 
   int newSocket = -1;
+  char *clientsFull = "Sorry, no more clients can join!\n";
 
   signal(SIGINT, sigHandler);
 
