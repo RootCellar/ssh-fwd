@@ -295,15 +295,17 @@ int main(int argc, char const *argv[])
       }
       else if(newSocket >= 0) {
 
-        clients[i].forward_buffer = setup_socket(newSocket, BUFFER_SIZE);
-        if(clients[i].forward_buffer <= 0) {
-          debug_print("Could not create buffer for forward connection\n");
-          close_fd(clients, i);
-        }
-
         if(clients[i].forwarded_fd < 0) {
           clients[i].forwarded_fd = newSocket;
           debug_printf("Accepted a new forwarded connection %d\n", newSocket);
+
+          clients[i].forward_buffer = setup_socket(newSocket, BUFFER_SIZE);
+          if(clients[i].forward_buffer <= 0) {
+            debug_print("Could not create buffer for forward connection\n");
+            close_fd(clients, i);
+            continue;
+          }
+
           sendString(clients[i].connection_fd, "connect");
         }
         else {
