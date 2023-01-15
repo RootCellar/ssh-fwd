@@ -87,7 +87,6 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
   for(int i = 0; i < CLIENT_LIST_SIZE; i++) {
     client_fd = clients[i].connection_fd;
     if(client_fd < 0) continue;
-    //debug_printf("reading %d\n", i);
     errno = 0;
     len = read(client_fd, buffer, BUFFER_SIZE);
     if(errno == EAGAIN) {
@@ -101,8 +100,6 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
       EXIT_FAIL();
     }
     else {
-      //buffer[len-1] = 0;
-      //printf("Client %d: %s\n", i, buffer);
       client_forwarded_fd = clients[i].forwarded_fd;
       if(client_forwarded_fd >= 0) {
         sendData(client_forwarded_fd, buffer, len);
@@ -111,8 +108,6 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
 
     client_forwarded_fd = clients[i].forwarded_fd;
     if(client_forwarded_fd < 0) continue;
-
-    //debug_print("forward listen\n");
 
     errno = 0;
     len = read(client_forwarded_fd, buffer, BUFFER_SIZE);
@@ -127,7 +122,6 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
       EXIT_FAIL();
     }
     else {
-      //debug_print("Forwarding data to client\n");
       sendData(client_fd, buffer, len);
     }
 

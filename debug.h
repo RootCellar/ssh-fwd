@@ -16,6 +16,6 @@
                                 __LINE__, __func__); } while (0)
 
 
-#define EXIT_FAIL() debug_print("EXIT_FAIL"); perror("SEVERE ERROR"); exit(EXIT_FAILURE);
+#define EXIT_FAIL() debug_print("EXIT_FAIL\n"); perror("SEVERE ERROR"); exit(EXIT_FAILURE);
 
 #endif

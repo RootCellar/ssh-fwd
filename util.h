@@ -1,12 +1,17 @@
 #include "debug.h"
 #include "memory.h"
 
+#include <linux/tcp.h>
+
 #ifndef UTIL_H
 #define UTIL_H
 
 int setup_fd(int fd) {
   int flags = fcntl(fd, F_GETFL, 0);
   fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+
+  flags = 1;
+  setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, (char *) &flags, sizeof(int));
 
   return 1;
 }
@@ -42,7 +47,7 @@ void sendData(int fd, char* data, int count) {
 
 void sendString(int fd, char* data) {
   sendData(fd, data, strlen(data));
-  sendData(fd, '\0', 1);
+  //sendData(fd, '\0', 1);
 }
 
 #endif

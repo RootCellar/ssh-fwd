@@ -24,7 +24,7 @@
 
 
 int create_connection(char* host, int port) {
-  int sock;
+  int sock = -1;
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if(sock < 0) {
     return -1;
@@ -33,21 +33,30 @@ int create_connection(char* host, int port) {
   struct sockaddr_in serv_addr;
 
   serv_addr.sin_family = AF_INET;
-  serv_addr.sin_port = htons(SSH_PORT);
+  serv_addr.sin_port = htons(port);
 
-  if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr)<=0)
+  debug_print("Have socket, setting up remote address...\n");
+
+  if(inet_pton(AF_INET, host, &serv_addr.sin_addr)<0)
   {
       perror("Invalid address/ Address not supported");
       return -1;
   }
 
-  int result = connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+  debug_printf("Connecting to host %s port %d...\n", host, port);
+
+  int result = -1;
+  result = connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
   if( result < 0 ) {
     return -1;
   }
 
+  debug_print("Connected, making socket non-blocking...\n");
+
   int flags = fcntl(sock, F_GETFL, 0);
   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+
+  debug_print("Returning socket file descriptor...\n");
 
   return sock;
 
@@ -63,45 +72,18 @@ int main(int argc, char* argv[])
     }
     printf("Will connect to %s\n", serverAddress);
 
-    int sock = -1, valread;
+    int sock = -1; //, valread;
     int fwd_sock = -1;
-    struct sockaddr_in serv_addr;
-    char *string = "hello";
+    //struct sockaddr_in serv_addr;
+    //char *string = "hello";
     char buffer[BUFFER_SIZE] = {0};
-
-    if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-    {
-        perror("Socket creation error");
-        return -1;
+    
+    sock = create_connection(serverAddress, PORT);
+    if(sock < 0) {
+      EXIT_FAIL();
     }
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-
-    // Convert IPv4 and IPv6 addresses from text to binary form
-    if(inet_pton(AF_INET, serverAddress, &serv_addr.sin_addr)<=0)
-    {
-        perror("Invalid address/ Address not supported");
-        return -1;
-    }
-
-    debug_print("Connecting to host\n");
-
-    if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-    {
-        perror("Connection Failed");
-        return -1;
-    }
-
-    debug_print("Connected\n");
-
-    // Make stdin non-blocking
-    int flags = fcntl(STDIN_FILENO, F_GETFL, 0);
-    fcntl(STDIN_FILENO, F_SETFL, flags | O_NONBLOCK);
-
-    // Make the socket non-blocking
-    flags = fcntl(sock, F_GETFL, 0);
-    fcntl(sock, F_SETFL, flags | O_NONBLOCK);
+    printf("Connected\n");
 
     while(1) {
 
@@ -124,9 +106,7 @@ int main(int argc, char* argv[])
         sock = -1;
       }
       else if (errno != 0) {
-        // Some other error occurred
-        perror("error on read");
-        exit(EXIT_FAILURE);
+        EXIT_FAIL();
       }
       else {
         //printf("From Server: %s\n", buffer);
@@ -138,12 +118,12 @@ int main(int argc, char* argv[])
             fwd_sock = create_connection("127.0.0.1", 22);
             if(fwd_sock < 0) {
               printf("Could not initiate connection");
-              exit(EXIT_FAILURE);
+              EXIT_FAIL();
             }
           }
         }
         else {
-          write(fwd_sock, buffer, len);
+          sendData(fwd_sock, buffer, len);
         }
       }
 
@@ -162,9 +142,7 @@ int main(int argc, char* argv[])
           fwd_sock = -1;
         }
         else if (errno != 0) {
-          // Some other error occurred
-          perror("error on read");
-          exit(EXIT_FAILURE);
+          EXIT_FAIL();
         }
         else {
           //printf("From SSH Server: %s\n", buffer);
@@ -172,7 +150,7 @@ int main(int argc, char* argv[])
 
           }
           else {
-            write(sock, buffer, len);
+            sendData(sock, buffer, len);
           }
         }
 
