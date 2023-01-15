@@ -14,6 +14,8 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include "debug.h"
+
 #define DEFAULT_POINTER_LIST_SIZE 1024
 
 struct ptr_data {
