@@ -234,8 +234,7 @@ int main(int argc, char const *argv[])
     // Attempt to Accept a connection
 
     errno = 0;
-    newSocket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-    //debug_print("accept\n");
+    newSocket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);\
     if(errno == EAGAIN) {
       //continue...
     }
