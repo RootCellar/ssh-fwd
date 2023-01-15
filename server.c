@@ -81,12 +81,16 @@ void close_forward(struct client_data* clients, int id) {
   clients[id].forwarded_fd = -1;
 }
 
-void handle_client_connections(struct client_data* clients, char* buffer) {
+void handle_client_connections(struct client_data* clients) {
   int len;
   int client_fd, client_forwarded_fd;
+  char* buffer;
   for(int i = 0; i < CLIENT_LIST_SIZE; i++) {
+
     client_fd = clients[i].connection_fd;
     if(client_fd < 0) continue;
+
+    buffer = clients[i].connection_buffer;
     errno = 0;
     len = read(client_fd, buffer, BUFFER_SIZE);
     if(errno == EAGAIN) {
@@ -109,6 +113,7 @@ void handle_client_connections(struct client_data* clients, char* buffer) {
     client_forwarded_fd = clients[i].forwarded_fd;
     if(client_forwarded_fd < 0) continue;
 
+    buffer = clients[i].forward_buffer;
     errno = 0;
     len = read(client_forwarded_fd, buffer, BUFFER_SIZE);
     if(errno == EAGAIN) {
@@ -320,7 +325,7 @@ int main(int argc, char const *argv[])
       }
     }
 
-    handle_client_connections(clients, buffer);
+    handle_client_connections(clients);
 
     usleep(1000);
   }
