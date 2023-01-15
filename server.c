@@ -214,6 +214,9 @@ int main(int argc, char const *argv[])
     clients[i].connection_fd = -1;
     clients[i].listen_fd = -1;
     clients[i].forwarded_fd = -1;
+
+    clients[i].connection_buffer = 0;
+    clients[i].forward_buffer = 0;
   }
 
   server_fd = create_server_socket(PORT, 1);
@@ -231,7 +234,7 @@ int main(int argc, char const *argv[])
     // Attempt to Accept a connection
 
     errno = 0;
-    newSocket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);\
+    newSocket = accept(server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
     if(errno == EAGAIN) {
       //continue...
     }
