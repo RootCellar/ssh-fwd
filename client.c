@@ -65,32 +65,72 @@ int create_connection(char* host, int port) {
 int main(int argc, char* argv[])
 {
 
-    char* serverAddress = "127.0.0.1";
+  char* serverAddress = "127.0.0.1";
 
-    if(argc > 1) {
-      serverAddress = argv[1];
+  if(argc > 1) {
+    serverAddress = argv[1];
+  }
+  printf("Will connect to %s\n", serverAddress);
+
+  int sock = -1; //, valread;
+  int fwd_sock = -1;
+  //struct sockaddr_in serv_addr;
+  //char *string = "hello";
+  char buffer[BUFFER_SIZE] = {0};
+
+  sock = create_connection(serverAddress, PORT);
+  if(sock < 0) {
+    EXIT_FAIL();
+  }
+
+  printf("Connected\n");
+
+  while(1) {
+
+    // Reset Error, attempt to read data from the socket
+
+    errno = 0;
+    int len = read(sock, buffer, BUFFER_SIZE);
+
+    if(errno == EAGAIN) {
+      // No data, continue...
     }
-    printf("Will connect to %s\n", serverAddress);
-
-    int sock = -1; //, valread;
-    int fwd_sock = -1;
-    //struct sockaddr_in serv_addr;
-    //char *string = "hello";
-    char buffer[BUFFER_SIZE] = {0};
-    
-    sock = create_connection(serverAddress, PORT);
-    if(sock < 0) {
+    else if(len == 0) {
+      // socket is disconnected
+      printf("Disconnected\n");
+      close(sock);
+      if(fwd_sock >= 0) {
+        close(fwd_sock);
+        fwd_sock = -1;
+      }
+      sock = -1;
+    }
+    else if (errno != 0) {
       EXIT_FAIL();
     }
+    else {
+      //printf("From Server: %s\n", buffer);
+      if(fwd_sock < 0) {
+        // Parse Command
+        if(strcmp(buffer,"connect") == 0) {
+          debug_print("Connecting to SSH Server...\n");
+          // Begin forward
+          fwd_sock = create_connection("127.0.0.1", 22);
+          if(fwd_sock < 0) {
+            printf("Could not initiate connection");
+            EXIT_FAIL();
+          }
+        }
+      }
+      else {
+        sendData(fwd_sock, buffer, len);
+      }
+    }
 
-    printf("Connected\n");
-
-    while(1) {
-
-      // Reset Error, attempt to read data from the socket
+    if(fwd_sock >= 0) {
 
       errno = 0;
-      int len = read(sock, buffer, BUFFER_SIZE);
+      int len = read(fwd_sock, buffer, BUFFER_SIZE);
 
       if(errno == EAGAIN) {
         // No data, continue...
@@ -98,84 +138,44 @@ int main(int argc, char* argv[])
       else if(len == 0) {
         // socket is disconnected
         printf("Disconnected\n");
-        close(sock);
-        if(fwd_sock >= 0) {
-          close(fwd_sock);
-          fwd_sock = -1;
-        }
-        sock = -1;
+        close(fwd_sock);
+        fwd_sock = -1;
       }
       else if (errno != 0) {
         EXIT_FAIL();
       }
       else {
-        //printf("From Server: %s\n", buffer);
+        //printf("From SSH Server: %s\n", buffer);
         if(fwd_sock < 0) {
-          // Parse Command
-          if(strcmp(buffer,"connect") == 0) {
-            debug_print("Connecting to SSH Server...\n");
-            // Begin forward
-            fwd_sock = create_connection("127.0.0.1", 22);
-            if(fwd_sock < 0) {
-              printf("Could not initiate connection");
-              EXIT_FAIL();
-            }
-          }
+
         }
         else {
-          sendData(fwd_sock, buffer, len);
+          sendData(sock, buffer, len);
         }
       }
 
-      if(fwd_sock >= 0) {
-
-        errno = 0;
-        int len = read(fwd_sock, buffer, BUFFER_SIZE);
-
-        if(errno == EAGAIN) {
-          // No data, continue...
-        }
-        else if(len == 0) {
-          // socket is disconnected
-          printf("Disconnected\n");
-          close(fwd_sock);
-          fwd_sock = -1;
-        }
-        else if (errno != 0) {
-          EXIT_FAIL();
-        }
-        else {
-          //printf("From SSH Server: %s\n", buffer);
-          if(fwd_sock < 0) {
-
-          }
-          else {
-            sendData(sock, buffer, len);
-          }
-        }
-
-      }
-
-      // Reset Error, attempt to read from STDIN
-
-      /*
-
-      errno = 0;
-      len = read(STDIN_FILENO, buffer, BUFFER_SIZE);
-
-      if(errno == EAGAIN) {
-        // No input, continue...
-      }
-      else {
-        // Send input from STDIN to server
-        buffer[len] = 0;
-        send(sock, buffer, strlen(buffer), 0);
-      }
-
-      */
-
-      usleep(1000);
     }
 
-    return 0;
+    // Reset Error, attempt to read from STDIN
+
+    /*
+
+    errno = 0;
+    len = read(STDIN_FILENO, buffer, BUFFER_SIZE);
+
+    if(errno == EAGAIN) {
+      // No input, continue...
+    }
+    else {
+      // Send input from STDIN to server
+      buffer[len] = 0;
+      send(sock, buffer, strlen(buffer), 0);
+    }
+
+    */
+
+    usleep(1000);
+  }
+
+  return 0;
 }
