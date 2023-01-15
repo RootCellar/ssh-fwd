@@ -286,7 +286,6 @@ int main(int argc, char const *argv[])
       client_fd = clients[i].listen_fd;
       if(client_fd < 0) continue;
       newSocket = accept(client_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
-      //debug_print("accept\n");
       if(errno == EAGAIN) {
         //continue...
       }
