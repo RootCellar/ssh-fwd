@@ -23,11 +23,6 @@ char* setup_socket(int fd, int bufferSize) {
   return tMalloc(sizeof(char) * bufferSize);
 }
 
-void forward_data(int dest, char* buffer) {
-  write(dest, buffer, strlen(buffer));
-  perror("write");
-}
-
 void sendData(int fd, char* data, int count) {
   int j;
   int sent = 0;
