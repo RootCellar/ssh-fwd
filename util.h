@@ -41,13 +41,10 @@ void sendData(int fd, char* data, int count) {
         break;
       }
   }
-
-  //write(fd, data, count);
 }
 
 void sendString(int fd, char* data) {
   sendData(fd, data, strlen(data));
-  //sendData(fd, '\0', 1);
 }
 
 #endif
