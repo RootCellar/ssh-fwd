@@ -14,17 +14,42 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
+#include <stdint.h>
+
 #include "debug.h"
 
 #define DEFAULT_POINTER_LIST_SIZE 1024
 
 struct ptr_data {
   void* ptr;
-  unsigned long int size;
+
+  //unsigned long int size;
+  size_t size;
 };
 
 struct ptr_data* POINTER_LIST = 0;
 int POINTER_LIST_SIZE = 0;
+
+// Determines whether or not the given address is owned
+// based on what's in the pointer list
+int tOwnsAddress(void* adr) {
+  struct ptr_data* current;
+  for(int i = 0; i < POINTER_LIST_SIZE; i++) {
+
+    if(POINTER_LIST[i].ptr > 0) {
+
+      current = &POINTER_LIST[i];
+      if( (uintptr_t) current->ptr <= (uintptr_t) adr 
+      && (uintptr_t) adr < (uintptr_t) (current->ptr + current->size) ) {
+        return 1;
+      }
+
+    }
+
+  }
+
+  return 0;
+}
 
 // Returns the number of allocations.
 // Could be used to see if a function leaks memory on it's own
