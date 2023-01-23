@@ -101,7 +101,8 @@ void handle_client_connections(struct client_data* clients) {
       close_fd(clients, i);
     }
     else if(errno != 0) {
-      EXIT_FAIL();
+      debug_printf("Client %d disconnected.\n", i);
+      close_fd(clients, i);
     }
     else {
       client_forwarded_fd = clients[i].forwarded_fd;
@@ -124,7 +125,8 @@ void handle_client_connections(struct client_data* clients) {
       close_fd(clients, i);
     }
     else if(errno != 0) {
-      EXIT_FAIL();
+      debug_printf("Client %d disconnected.\n", i);
+      close_fd(clients, i);
     }
     else {
       sendData(client_fd, buffer, len);
