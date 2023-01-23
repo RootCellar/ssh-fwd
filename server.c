@@ -141,7 +141,7 @@ int find_empty_client_slot(struct client_data* clients) {
   return -1;
 }
 
-int create_server_socket(int port, int retry) {
+int create_server_socket(int port, int isServerSocket) {
   int server_fd;
   struct sockaddr_in address;
   int addrlen = sizeof(address);
@@ -167,14 +167,15 @@ int create_server_socket(int port, int retry) {
   setup_fd(server_fd);
 
   address.sin_family = AF_INET;
-  address.sin_addr.s_addr = INADDR_ANY;
+  if(isServerSocket) address.sin_addr.s_addr = INADDR_ANY;
+  else address.sin_addr.s_addr = inet_addr("127.0.0.1");
   address.sin_port = htons( port );
 
   debug_print("Binding server socket...\n");
 
-  if(retry) {
+  if(isServerSocket) {
     result = -1;
-    while(retry && result < 0) {
+    while(result < 0) {
       result = bind(server_fd, (struct sockaddr *)&address, sizeof(address));
       usleep(1000000);
     }
