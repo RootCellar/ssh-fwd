@@ -139,6 +139,11 @@ int tAdd(void* ptr, unsigned long int len) {
 void* tMalloc(unsigned long int len) {
   debug_printf("Allocating %lu bytes\n", len);
 
+  if(len <= 0) {
+    debug_printf("Refusing to allocate %lu bytes", len);
+    return 0;
+  }
+
   void* toRet = malloc(len);
 
   if(toRet > 0) {
