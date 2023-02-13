@@ -199,6 +199,7 @@ int tFree(void* ptr) {
 
 // Resize the pointer list to hold "len" items.
 int tResize(int len) {
+  debug_print("Attempting to resize pointer list...");
   int allocs = tGetTotalAllocs();
   if(len < allocs) {
     debug_print("Refusing to allocate pointer list to be smaller than current number of allocations");
@@ -212,6 +213,7 @@ int tResize(int len) {
   }
 
   if(POINTER_LIST > 0) {
+    debug_print("Replacing old pointer list...");
     memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
     free(POINTER_LIST);
   }
