@@ -100,6 +100,16 @@ int tFindSpot(void* ptr) {
   return -1;
 }
 
+// Get the size of the given pointer
+// Must be kept tracked of in our list.
+// Returns 0 if the size is zero or if the pointer is not found.
+size_t tGetSize(void* ptr) {
+  int spot = tFindSpot(ptr);
+  if(spot < 0) { return 0; }
+
+  return POINTER_LIST[spot].size;
+}
+
 // Add the given pointer, with len bytes allocated,
 // to the list of tracked pointers
 int tAdd(void* ptr, unsigned long int len) {
