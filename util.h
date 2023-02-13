@@ -6,6 +6,58 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+// INCOMPLETE
+struct buffer_data {
+  char* buffer;
+  size_t buffer_size;
+  size_t amount_filled;
+  int complete_message;
+};
+
+// INCOMPLETE
+// Create and initialize buffer data
+struct buffer_data create_buffer_data(size_t size) {
+  struct buffer_data toRet;
+  toRet.buffer = tMalloc(size);
+  if( !(toRet.buffer > 0) ) {
+    return toRet;
+  }
+
+  toRet.buffer_size = size;
+  toRet.amount_filled = 0;
+  toRet.complete_message = 0;
+
+  return toRet;
+}
+
+// INCOMPLETE
+// Read data from a socket into a buffer,
+// where the first two bytes of any message is the channel and the next
+// four are the length
+int channel_read_buffered(int fd, struct buffer_data* buffer) {
+  if( !(buffer > 0) ) return 0;
+  if( buffer->buffer_size < 4 ) return 0;
+
+  char* read_pos = buffer->buffer + buffer->amount_filled;
+  size_t max_count = buffer->buffer_size - buffer->amount_filled;
+
+  int len_read = read(fd, read_pos, max_count);
+
+  if(errno == EAGAIN || len_read == 0) return 0;
+  else if(errno != 0) return 0;
+
+  buffer->amount_filled += len_read;
+
+  int channel = buffer->buffer[0];
+  int len = buffer->buffer[1];
+
+  if(buffer->amount_filled == len + 2) {
+    buffer->complete_message = 1;
+  }
+
+  return len_read;
+}
+
 int setup_fd(int fd) {
   int flags = fcntl(fd, F_GETFL, 0);
   fcntl(fd, F_SETFL, flags | O_NONBLOCK);
