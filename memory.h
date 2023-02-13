@@ -33,6 +33,8 @@ int POINTER_LIST_SIZE = 0;
 // Determines whether or not the given address is owned
 // based on what's in the pointer list
 int tOwnsAddress(void* adr) {
+  if( !(POINTER_LIST > 0) ) return 0;
+
   struct ptr_data* current;
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
 
@@ -54,6 +56,8 @@ int tOwnsAddress(void* adr) {
 // Returns the number of allocations.
 // Could be used to see if a function leaks memory on it's own
 int tGetTotalAllocs() {
+  if( !(POINTER_LIST > 0) ) return 0;
+
   unsigned long int count = 0;
   debug_print("Counting all pointers...\n");
 
@@ -68,6 +72,8 @@ int tGetTotalAllocs() {
 }
 
 unsigned long int tGetTotalAllocSize() {
+  if( !(POINTER_LIST > 0) ) return 0;
+
   unsigned long int sum = 0;
   debug_print("Finding total size of all pointers...\n");
 
@@ -89,6 +95,8 @@ void tPrintStatus() {
 // Handy trick: tFindSpot(0) can be used to find an empty slot
 // to track a new pointer
 int tFindSpot(void* ptr) {
+  if( !(POINTER_LIST > 0) ) return -1;
+
   debug_printf("Finding pointer %p\n", ptr);
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
     if(POINTER_LIST[i].ptr == ptr) {
@@ -167,7 +175,7 @@ void* tMalloc(unsigned long int len) {
 // if it is in the list and is a valid pointer
 int tFree(void* ptr) {
 
-  if(ptr <= 0) return 1; // invalid pointer
+  if(ptr <= 0) return 0; // invalid pointer
 
   debug_print("Attempting to free a pointer\n");
 
@@ -186,6 +194,30 @@ int tFree(void* ptr) {
   ptrData->ptr = 0;
   debug_printf("Freed %lu bytes\n", ptrData->size );
   tPrintStatus();
+  return 0;
+}
+
+// Resize the pointer list to hold "len" items.
+int tResize(int len) {
+  int allocs = tGetTotalAllocs();
+  if(len < allocs) {
+    debug_print("Refusing to allocate pointer list to be smaller than current number of allocations");
+    return 1;
+  }
+
+  void* new_pointer_list = malloc(len * sizeof(struct ptr_data));
+  if(new_pointer_list <= 0) {
+    debug_print("Could not allocate new pointer list!");
+    return 1;
+  }
+
+  if(POINTER_LIST > 0) {
+    memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
+    free(POINTER_LIST);
+  }
+
+  POINTER_LIST_SIZE = len;
+  POINTER_LIST = new_pointer_list;
   return 0;
 }
 
