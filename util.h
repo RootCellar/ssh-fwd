@@ -6,6 +6,25 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+// Split num into bytes split1 and split2, which are given by the caller
+// and set in this function
+void short_to_bytes(short num, char* split1, char* split2) {
+  (*split1) = num & 0xFF;
+  (*split2) = (num >> 8) & 0xFF;
+}
+
+// Return the short represented by split1 and split2
+short bytes_to_short(char split1, char split2) {
+  short num = 0;
+
+  num = split2;
+  num <<= 8;
+
+  num |= split1 & 0xFF;
+
+  return num;
+}
+
 // INCOMPLETE
 struct buffer_data {
   char* buffer;
@@ -33,10 +52,10 @@ struct buffer_data create_buffer_data(size_t size) {
 // INCOMPLETE
 // Read data from a socket into a buffer,
 // where the first two bytes of any message is the channel and the next
-// four are the length
+// two are the length
 int channel_read_buffered(int fd, struct buffer_data* buffer) {
   if( !(buffer > 0) ) return 0;
-  if( buffer->buffer_size < 4 ) return 0;
+  if( buffer->buffer_size < 8 ) return 0;
 
   char* read_pos = buffer->buffer + buffer->amount_filled;
   size_t max_count = buffer->buffer_size - buffer->amount_filled;
@@ -48,10 +67,12 @@ int channel_read_buffered(int fd, struct buffer_data* buffer) {
 
   buffer->amount_filled += len_read;
 
-  int channel = buffer->buffer[0];
-  int len = buffer->buffer[1];
+  short channel, len;
 
-  if(buffer->amount_filled == len + 2) {
+  channel = bytes_to_short(buffer->buffer[0], buffer->buffer[1]);
+  len = bytes_to_short(buffer->buffer[2], buffer->buffer[3]);
+
+  if(buffer->amount_filled == len + 4) {
     buffer->complete_message = 1;
   }
 
