@@ -67,9 +67,19 @@ int buffer_consume(void* dest, struct buffer_data* buffer, size_t bytes) {
 
   if(buffer->buffer_size < bytes) return 1;
 
+  // Copy to destination
+  errno = 0;
   memcpy(dest, buffer->buffer, bytes);
+  if(errno != 0) return 1;
 
-  // TODO: Shift the rest of the buffer back
+  // Shift the rest of the buffer back
+  // don't use memcpy() because it doesn't necessarily copy 
+  // in the correct order (beginning to end)
+  for(size_t i = 0; i < buffer->buffer_size - bytes; i++) {
+    buffer->buffer[i] = buffer->buffer[bytes + i];
+  }
+
+  return 0;
 }
 
 int setup_fd(int fd) {
