@@ -1,8 +1,6 @@
 #include "debug.h"
 #include "memory.h"
 
-#include <linux/tcp.h>
-
 #ifndef UTIL_H
 #define UTIL_H
 
