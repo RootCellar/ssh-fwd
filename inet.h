@@ -1,5 +1,7 @@
 #include <linux/tcp.h>
 
+#include "util.h"
+
 #ifndef INET_H
 #define INET_H
 
@@ -19,6 +21,8 @@ struct buffer_data create_buffer_data(size_t size) {
   if( !(toRet.buffer > 0) ) {
     return toRet;
   }
+
+  memset(toRet.buffer, 0, size);
 
   toRet.buffer_size = size;
   toRet.amount_filled = 0;
@@ -51,11 +55,21 @@ int channel_read_buffered(int fd, struct buffer_data* buffer) {
   len = bytes_to_short(buffer->buffer[2], buffer->buffer[3]);
   debug_printf("%d %d", channel, len);
 
-  if(buffer->amount_filled == len + 4) {
+  if(buffer->amount_filled >= len + 4) {
     buffer->complete_message = 1;
   }
 
   return len_read;
+}
+
+int buffer_consume(void* dest, struct buffer_data* buffer, size_t bytes) {
+  if(dest == 0 || buffer == 0) return 1;
+
+  if(buffer->buffer_size < bytes) return 1;
+
+  memcpy(dest, buffer->buffer, bytes);
+
+  // TODO: Shift the rest of the buffer back
 }
 
 int setup_fd(int fd) {
