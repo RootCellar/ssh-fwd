@@ -16,6 +16,7 @@
 
 #include "debug.h"
 #include "util.h"
+#include "inet.h"
 
 // Constants
 #define PORT 8090
