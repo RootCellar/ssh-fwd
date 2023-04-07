@@ -82,6 +82,10 @@ int buffer_consume(void* dest, struct buffer_data* buffer, size_t bytes) {
   return 0;
 }
 
+/*
+ * Setup the given socket file descriptor
+ * by enabling non-blocking usage and setting TCP_NODELAY
+*/
 int setup_fd(int fd) {
   int flags = fcntl(fd, F_GETFL, 0);
   fcntl(fd, F_SETFL, flags | O_NONBLOCK);
@@ -108,6 +112,7 @@ void sendData(int fd, char* data, int count) {
       if(j >= 0) sent += j;
 
       if(j < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+        // TODO: Maybe return an error here instead of just printing an error
         perror("write loop");
         break;
       }
