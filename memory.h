@@ -7,7 +7,7 @@
  * This allows allocated bytes and pointers to be kept track of,
  * and for pointers to never really be lost.
  *
- * Does not currently support resizing the pointer list.
+ * Supports manual list resizing - does not resize automatically.
  *
 */
 
