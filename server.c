@@ -7,14 +7,22 @@
 // Headers
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/socket.h>
 #include <stdlib.h>
+
+// Internet 
+
+#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+// Utility
+
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <signal.h>
+
+// Local Headers
 
 #include "debug.h"
 #include "util.h"
