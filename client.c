@@ -158,24 +158,6 @@ int main(int argc, char* argv[])
 
     }
 
-    // Reset Error, attempt to read from STDIN
-
-    /*
-
-    errno = 0;
-    len = read(STDIN_FILENO, buffer, BUFFER_SIZE);
-
-    if(errno == EAGAIN) {
-      // No input, continue...
-    }
-    else {
-      // Send input from STDIN to server
-      buffer[len] = 0;
-      send(sock, buffer, strlen(buffer), 0);
-    }
-
-    */
-
     usleep(1000);
   }
 
