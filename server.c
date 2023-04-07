@@ -38,6 +38,9 @@ struct client_data {
 // Server-specific functions
 
 void close_fd(struct client_data* clients, int id) {
+
+  // Close any open connections
+
   if(clients[id].connection_fd > 0) {
     debug_printf("Disconnecting client %d...\n", id);
     close(clients[id].connection_fd);
@@ -51,9 +54,13 @@ void close_fd(struct client_data* clients, int id) {
     close(clients[id].forwarded_fd);
   }
 
+  // Make sure to mark connections as closed/unused
+
   clients[id].connection_fd = -1;
   clients[id].listen_fd = -1;
   clients[id].forwarded_fd = -1;
+
+  // Free buffers and set them to null pointers
 
   if(clients[id].connection_buffer > 0) {
     debug_print("Freeing message buffer...\n");
@@ -83,6 +90,9 @@ void close_forward(struct client_data* clients, int id) {
   clients[id].forwarded_fd = -1;
 }
 
+/*
+ * Forwards data back and forth from the client and the remote connected to it
+*/
 void handle_client_connections(struct client_data* clients) {
   int len;
   int client_fd, client_forwarded_fd;

@@ -16,6 +16,11 @@
                                 __LINE__, __func__); } while (0)
 
 
+/*
+ * Useful for debugging why an exit happened by printing where it happened
+ * and potentially some explanation as to why with perror()
+*/
+
 #define EXIT_FAIL() debug_print("EXIT_FAIL\n"); perror("SEVERE ERROR"); exit(EXIT_FAILURE);
 
 #endif
