@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 // Internet 
 
@@ -163,7 +164,7 @@ int find_empty_client_slot(struct client_data* clients) {
   return -1;
 }
 
-int create_server_socket(int port, int isServerSocket) {
+int create_server_socket(int port, bool isServerSocket) {
   int server_fd;
   struct sockaddr_in address;
   int addrlen = sizeof(address);
@@ -247,7 +248,7 @@ int main(int argc, char const *argv[])
     clients[i].forward_buffer = 0;
   }
 
-  server_fd = create_server_socket(PORT, 1);
+  server_fd = create_server_socket(PORT, true);
   if(server_fd < 0) {
     EXIT_FAIL();
   }
@@ -290,7 +291,7 @@ int main(int argc, char const *argv[])
 
           debug_print("Attempting to make listen socket for client\n");
           int port = PORT + (spot+1);
-          int newServerSocket = create_server_socket(port, 0);
+          int newServerSocket = create_server_socket(port, true);
           if(newServerSocket < 0) {
             debug_print("Server socket creation failed\n");
             close_fd(clients, spot);
