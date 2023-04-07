@@ -117,6 +117,7 @@ int main(int argc, char* argv[])
         if(strcmp(buffer,"connect") == 0) {
           debug_print("Connecting to SSH Server...\n");
           // Begin forward
+          // TODO: probably allow SSH port to be configured - it might not be on port 22!
           fwd_sock = create_connection("127.0.0.1", 22);
           if(fwd_sock < 0) {
             printf("Could not initiate connection");
