@@ -40,7 +40,7 @@ int create_connection(char* host, int port) {
 
   if(inet_pton(AF_INET, host, &serv_addr.sin_addr)<0)
   {
-      perror("Invalid address/ Address not supported");
+      perror("Invalid address/Address not supported");
       return -1;
   }
 
