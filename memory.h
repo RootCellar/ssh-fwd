@@ -199,8 +199,9 @@ int tFree(void* ptr) {
 
 // Resize the pointer list to hold "len" items.
 int tResize(int len) {
-  debug_print("Attempting to resize pointer list...");
+
   int allocs = tGetTotalAllocs();
+  debug_printf("Attempting to resize pointer list... %d -> %d\n", allocs, len);
   if(len < allocs) {
     debug_print("Refusing to allocate pointer list to be smaller than current number of allocations");
     return 1;
