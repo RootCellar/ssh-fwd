@@ -258,6 +258,8 @@ int main(int argc, char const *argv[])
 
   signal(SIGINT, sigHandler);
 
+  tResize(65536);
+
   while(1) {
 
     // Attempt to Accept a connection
