@@ -203,18 +203,18 @@ int tResize(int len) {
   int allocs = tGetTotalAllocs();
   debug_printf("Attempting to resize pointer list... %d -> %d\n", allocs, len);
   if(len < allocs) {
-    debug_print("Refusing to allocate pointer list to be smaller than current number of allocations");
+    debug_print("Refusing to allocate pointer list to be smaller than current number of allocations\n");
     return 1;
   }
 
   void* new_pointer_list = malloc(len * sizeof(struct ptr_data));
   if(new_pointer_list <= 0) {
-    debug_print("Could not allocate new pointer list!");
+    debug_print("Could not allocate new pointer list!\n");
     return 1;
   }
 
   if(POINTER_LIST > 0) {
-    debug_print("Replacing old pointer list...");
+    debug_print("Replacing old pointer list...\n");
     memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
     free(POINTER_LIST);
   }
