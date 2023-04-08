@@ -118,16 +118,44 @@ size_t tGetSize(void* ptr) {
   return POINTER_LIST[spot].size;
 }
 
+// Resize the pointer list to hold "len" items.
+int tResize(int len) {
+
+  int allocs = tGetTotalAllocs();
+  debug_printf("Attempting to resize pointer list... %d -> %d\n", allocs, len);
+  if(len < allocs) {
+    debug_print("Refusing to allocate pointer list to be smaller than current number of allocations\n");
+    return 1;
+  }
+
+  void* new_pointer_list = malloc(len * sizeof(struct ptr_data));
+  if(new_pointer_list <= 0) {
+    debug_print("Could not allocate new pointer list!\n");
+    return 1;
+  }
+
+  if(POINTER_LIST > 0) {
+    debug_print("Replacing old pointer list...\n");
+    memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
+    free(POINTER_LIST);
+  }
+
+  debug_print("Success\n");
+
+  POINTER_LIST_SIZE = len;
+  POINTER_LIST = new_pointer_list;
+  return 0;
+}
+
 // Add the given pointer, with len bytes allocated,
 // to the list of tracked pointers
 int tAdd(void* ptr, unsigned long int len) {
   if(POINTER_LIST <= 0) {
-    POINTER_LIST = malloc( sizeof(struct ptr_data) * DEFAULT_POINTER_LIST_SIZE );
-    if(POINTER_LIST <= 0) {
+    int failed = tResize(DEFAULT_POINTER_LIST_SIZE);
+    if(failed) {
       // Could not create pointer list
       EXIT_FAIL();
     }
-    POINTER_LIST_SIZE = DEFAULT_POINTER_LIST_SIZE;
   }
 
   int spot = tFindSpot(0);
@@ -194,35 +222,6 @@ int tFree(void* ptr) {
   ptrData->ptr = 0;
   debug_printf("Freed %lu bytes\n", ptrData->size );
   tPrintStatus();
-  return 0;
-}
-
-// Resize the pointer list to hold "len" items.
-int tResize(int len) {
-
-  int allocs = tGetTotalAllocs();
-  debug_printf("Attempting to resize pointer list... %d -> %d\n", allocs, len);
-  if(len < allocs) {
-    debug_print("Refusing to allocate pointer list to be smaller than current number of allocations\n");
-    return 1;
-  }
-
-  void* new_pointer_list = malloc(len * sizeof(struct ptr_data));
-  if(new_pointer_list <= 0) {
-    debug_print("Could not allocate new pointer list!\n");
-    return 1;
-  }
-
-  if(POINTER_LIST > 0) {
-    debug_print("Replacing old pointer list...\n");
-    memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
-    free(POINTER_LIST);
-  }
-
-  debug_print("Success\n");
-
-  POINTER_LIST_SIZE = len;
-  POINTER_LIST = new_pointer_list;
   return 0;
 }
 
