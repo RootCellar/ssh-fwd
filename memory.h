@@ -219,6 +219,8 @@ int tResize(int len) {
     free(POINTER_LIST);
   }
 
+  debug_print("Success\n");
+
   POINTER_LIST_SIZE = len;
   POINTER_LIST = new_pointer_list;
   return 0;
