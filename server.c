@@ -5,6 +5,7 @@
 */
 
 // Headers
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,6 +31,7 @@
 #include "inet.h"
 
 // Constants
+
 #define PORT 8090
 #define BUFFER_SIZE 16384
 #define CLIENT_LIST_SIZE 32
