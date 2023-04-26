@@ -42,6 +42,7 @@ struct client_data {
   int connection_fd;
   int listen_fd;
   int forwarded_fd;
+  int wait;
   char* connection_buffer;
   char* forward_buffer;
 };
@@ -112,6 +113,11 @@ void handle_client_connections(struct client_data* clients) {
 
     client_fd = clients[i].connection_fd;
     if(client_fd < 0) continue;
+
+    if(clients[i].wait > 0) {
+      clients[i].wait--;
+      continue;
+    }
 
     buffer = clients[i].connection_buffer;
     errno = 0;
@@ -341,6 +347,7 @@ int main(int argc, char const *argv[])
           }
 
           sendString(clients[i].connection_fd, "connect");
+          clients[i].wait = 1000;
         }
         else {
           close(newSocket);
