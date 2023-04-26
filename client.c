@@ -19,7 +19,7 @@
 #include "inet.h"
 
 // Constants
-#define PORT 8090
+#define PORT 10090
 #define SSH_PORT 22
 #define BUFFER_SIZE 4096
 

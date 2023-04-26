@@ -32,7 +32,7 @@
 
 // Constants
 
-#define PORT 8090
+#define PORT 10090
 #define BUFFER_SIZE 16384
 #define CLIENT_LIST_SIZE 32
 
