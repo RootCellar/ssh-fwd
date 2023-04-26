@@ -29,10 +29,14 @@ struct ptr_data {
 struct ptr_data* POINTER_LIST = 0;
 int POINTER_LIST_SIZE = 0;
 
+int is_valid_ptr(void* ptr) {
+  return ptr > 0;
+}
+
 // Determines whether or not the given address is owned
 // based on what's in the pointer list
 int tOwnsAddress(void* adr) {
-  if( !(POINTER_LIST > 0) ) return 0;
+  if( !is_valid_ptr(POINTER_LIST) ) return 0;
 
   struct ptr_data* current;
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
@@ -55,13 +59,13 @@ int tOwnsAddress(void* adr) {
 // Returns the number of allocations.
 // Could be used to see if a function leaks memory on it's own
 int tGetTotalAllocs() {
-  if( !(POINTER_LIST > 0) ) return 0;
+  if( !is_valid_ptr(POINTER_LIST) ) return 0;
 
   unsigned long int count = 0;
   debug_print("Counting all pointers...\n");
 
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
-    if(POINTER_LIST[i].ptr > 0) {
+    if(is_valid_ptr(POINTER_LIST[i].ptr)) {
       debug_printf("Found pointer in slot %d\n", i);
       count += 1;
     }
@@ -71,7 +75,7 @@ int tGetTotalAllocs() {
 }
 
 unsigned long int tGetTotalAllocSize() {
-  if( !(POINTER_LIST > 0) ) return 0;
+  if( !is_valid_ptr(POINTER_LIST) ) return 0;
 
   unsigned long int sum = 0;
   debug_print("Finding total size of all pointers...\n");
@@ -94,7 +98,7 @@ void tPrintStatus() {
 // Handy trick: tFindSpot(0) can be used to find an empty slot
 // to track a new pointer
 int tFindSpot(void* ptr) {
-  if( !(POINTER_LIST > 0) ) return -1;
+  if( !is_valid_ptr(POINTER_LIST) ) return -1;
 
   debug_printf("Finding pointer %p\n", ptr);
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
@@ -107,8 +111,8 @@ int tFindSpot(void* ptr) {
   return -1;
 }
 
-// Get the size of the given pointer
-// Must be kept tracked of in our list.
+// Get the size of the given pointer.
+// Must be kept tracked of in the list.
 // Returns 0 if the size is zero or if the pointer is not found.
 size_t tGetSize(void* ptr) {
   int spot = tFindSpot(ptr);
@@ -128,12 +132,12 @@ int tResize(int len) {
   }
 
   void* new_pointer_list = malloc(len * sizeof(struct ptr_data));
-  if(new_pointer_list <= 0) {
+  if(!is_valid_ptr(new_pointer_list)) {
     debug_print("Could not allocate new pointer list!\n");
     return 1;
   }
 
-  if(POINTER_LIST > 0) {
+  if(is_valid_ptr(POINTER_LIST)) {
     debug_print("Replacing old pointer list...\n");
     memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
     free(POINTER_LIST);
@@ -149,7 +153,7 @@ int tResize(int len) {
 // Add the given pointer, with len bytes allocated,
 // to the list of tracked pointers
 int tAdd(void* ptr, unsigned long int len) {
-  if(POINTER_LIST <= 0) {
+  if(!is_valid_ptr(POINTER_LIST)) {
     int failed = tResize(DEFAULT_POINTER_LIST_SIZE);
     if(failed) {
       // Could not create pointer list
@@ -181,7 +185,7 @@ void* tMalloc(unsigned long int len) {
 
   void* toRet = malloc(len);
 
-  if(toRet > 0) {
+  if(is_valid_ptr(toRet)) {
     debug_printf("Successfully allocated %lu bytes\n", len);
     int failed = tAdd(toRet, len);
     if(failed) {
@@ -202,7 +206,7 @@ void* tMalloc(unsigned long int len) {
 // if it is in the list and is a valid pointer
 int tFree(void* ptr) {
 
-  if(ptr <= 0) return 0; // invalid pointer
+  if(!is_valid_ptr(ptr)) return 0; // invalid pointer
 
   debug_print("Attempting to free a pointer\n");
 
