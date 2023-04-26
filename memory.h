@@ -23,7 +23,6 @@
 struct ptr_data {
   void* ptr;
 
-  //unsigned long int size;
   size_t size;
 };
 
