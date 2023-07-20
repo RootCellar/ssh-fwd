@@ -21,6 +21,6 @@
  * and potentially some explanation as to why with perror()
 */
 
-#define EXIT_FAIL() debug_print("EXIT_FAIL\n"); perror("SEVERE ERROR"); exit(EXIT_FAILURE);
+#define EXIT_FAIL() do { debug_print("EXIT_FAIL\n"); perror("SEVERE ERROR"); exit(EXIT_FAILURE); } while(0)
 
 #endif
