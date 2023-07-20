@@ -121,9 +121,12 @@ size_t tGetSize(void* ptr) {
   return POINTER_LIST[spot].size;
 }
 
-// Resize the pointer list to hold "len" items.
-// Can increase OR decrease the size.
-// Can also create a new pointer list if one does not exist
+/* Resize the pointer list to hold "len" items.
+   Can increase OR decrease the size.
+   Can also create a new pointer list if one does not exist
+   
+   Returns 0 if successful, 1 if there was a failure
+*/
 int tResize(int len) {
 
   int allocs = tGetTotalAllocs();
