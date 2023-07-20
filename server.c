@@ -54,15 +54,15 @@ void close_fd(struct client_data* clients, int id) {
   // Close any open connections
 
   if(clients[id].connection_fd > 0) {
-    debug_printf("Disconnecting client %d...\n", id);
+    debug_printf("Disconnecting client %d...", id);
     close(clients[id].connection_fd);
   }
   if(clients[id].listen_fd > 0) {
-    debug_print("Client had forward socket, closing...\n");
+    debug_print("Client had forward socket, closing...");
     close(clients[id].listen_fd);
   }
   if(clients[id].forwarded_fd > 0) {
-    debug_print("Client had forwarded connection, closing...\n");
+    debug_print("Client had forwarded connection, closing...");
     close(clients[id].forwarded_fd);
   }
 
@@ -75,26 +75,26 @@ void close_fd(struct client_data* clients, int id) {
   // Free buffers and set them to null pointers
 
   if(clients[id].connection_buffer > 0) {
-    debug_print("Freeing message buffer...\n");
+    debug_print("Freeing message buffer...");
     tFree(clients[id].connection_buffer);
     clients[id].connection_buffer = 0;
   }
 
   if(clients[id].forward_buffer > 0) {
-    debug_print("Freeing forward buffer...\n");
+    debug_print("Freeing forward buffer...");
     tFree(clients[id].forward_buffer);
     clients[id].forward_buffer = 0;
   }
 }
 
 void close_forward(struct client_data* clients, int id) {
-  debug_printf("Closing forwarded socket for client %d\n", id);
+  debug_printf("Closing forwarded socket for client %d", id);
   if(clients[id].forwarded_fd > 0) {
     close(clients[id].forwarded_fd);
   }
 
   if(clients[id].forward_buffer > 0) {
-    debug_print("Freeing forward buffer...\n");
+    debug_print("Freeing forward buffer...");
     tFree(clients[id].forward_buffer);
     clients[id].forward_buffer = 0;
   }
@@ -126,11 +126,11 @@ void handle_client_connections(struct client_data* clients) {
       // Nothing
     }
     else if(len == 0) {
-      debug_printf("Client %d disconnected.\n", i);
+      debug_printf("Client %d disconnected.", i);
       close_fd(clients, i);
     }
     else if(errno != 0) {
-      debug_printf("Client %d disconnected.\n", i);
+      debug_printf("Client %d disconnected.", i);
       close_fd(clients, i);
     }
     else {
@@ -150,11 +150,11 @@ void handle_client_connections(struct client_data* clients) {
       // Nothing
     }
     else if(len == 0) {
-      debug_printf("Client %d disconnected from forward.\n", i);
+      debug_printf("Client %d disconnected from forward.", i);
       close_fd(clients, i);
     }
     else if(errno != 0) {
-      debug_printf("Client %d disconnected.\n", i);
+      debug_printf("Client %d disconnected.", i);
       close_fd(clients, i);
     }
     else {
@@ -202,7 +202,7 @@ int create_server_socket(int port, bool isServerSocket) {
   else address.sin_addr.s_addr = inet_addr("127.0.0.1");
   address.sin_port = htons( port );
 
-  debug_print("Binding server socket...\n");
+  debug_print("Binding server socket...");
 
   if(isServerSocket) {
     result = -1;
@@ -218,7 +218,7 @@ int create_server_socket(int port, bool isServerSocket) {
 
   if(result < 0) { return -1; }
 
-  debug_print("Enabling listen...\n");
+  debug_print("Enabling listen...");
 
   result = listen(server_fd, 3);
   if(result < 0) { return -1; }
@@ -282,33 +282,33 @@ int main(int argc, char const *argv[])
     }
     else if(newSocket >= 0) {
 
-      debug_printf("Accepted a new client connection %d\n", newSocket);
+      debug_printf("Accepted a new client connection %d", newSocket);
       int spot = find_empty_client_slot(clients);
       if(spot < 0) {
-        debug_print("All slots are full!\n");
+        debug_print("All slots are full!");
         send(newSocket, clientsFull, strlen(clientsFull), 0);
         close(newSocket);
       }
       else {
-        debug_printf("Found empty spot for client in %d\n", spot);
+        debug_printf("Found empty spot for client in %d", spot);
         clients[spot].connection_buffer = setup_socket(newSocket, BUFFER_SIZE);
         clients[spot].connection_fd = newSocket;
         if(clients[spot].connection_buffer <= 0) {
-          debug_print("Could not allocate buffer space for the client\n");
+          debug_print("Could not allocate buffer space for the client");
           close_fd(clients, spot);
         }
         else {
 
-          debug_print("Attempting to make listen socket for client\n");
+          debug_print("Attempting to make listen socket for client");
           int port = PORT + (spot+1);
           int newServerSocket = create_server_socket(port, true);
           if(newServerSocket < 0) {
-            debug_print("Server socket creation failed\n");
+            debug_print("Server socket creation failed");
             close_fd(clients, spot);
           }
           else {
             clients[spot].listen_fd = newServerSocket;
-            debug_printf("Client listen socket on %d created.\n", port);
+            debug_printf("Client listen socket on %d created.", port);
           }
 
         }
@@ -337,11 +337,11 @@ int main(int argc, char const *argv[])
 
         if(clients[i].forwarded_fd < 0) {
           clients[i].forwarded_fd = newSocket;
-          debug_printf("Accepted a new forwarded connection %d\n", newSocket);
+          debug_printf("Accepted a new forwarded connection %d", newSocket);
 
           clients[i].forward_buffer = setup_socket(newSocket, BUFFER_SIZE);
           if(clients[i].forward_buffer <= 0) {
-            debug_print("Could not create buffer for forward connection\n");
+            debug_print("Could not create buffer for forward connection");
             close_fd(clients, i);
             continue;
           }
@@ -351,7 +351,7 @@ int main(int argc, char const *argv[])
         }
         else {
           close(newSocket);
-          debug_print("Rejected a forwarded connection\n");
+          debug_print("Rejected a forwarded connection");
         }
 
       }

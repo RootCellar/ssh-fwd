@@ -36,7 +36,7 @@ int create_connection(char* host, int port) {
   serv_addr.sin_family = AF_INET;
   serv_addr.sin_port = htons(port);
 
-  debug_print("Have socket, setting up remote address...\n");
+  debug_print("Have socket, setting up remote address...");
 
   if(inet_pton(AF_INET, host, &serv_addr.sin_addr)<0)
   {
@@ -44,7 +44,7 @@ int create_connection(char* host, int port) {
       return -1;
   }
 
-  debug_printf("Connecting to host %s port %d...\n", host, port);
+  debug_printf("Connecting to host %s port %d...", host, port);
 
   int result = -1;
   result = connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
@@ -52,12 +52,12 @@ int create_connection(char* host, int port) {
     return -1;
   }
 
-  debug_print("Connected, making socket non-blocking...\n");
+  debug_print("Connected, making socket non-blocking...");
 
   int flags = fcntl(sock, F_GETFL, 0);
   fcntl(sock, F_SETFL, flags | O_NONBLOCK);
 
-  debug_print("Returning socket file descriptor...\n");
+  debug_print("Returning socket file descriptor...");
 
   return sock;
 
@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
       if(fwd_sock < 0) {
         // Parse Command
         if(strcmp(buffer,"connect") == 0) {
-          debug_print("Connecting to SSH Server...\n");
+          debug_print("Connecting to SSH Server...");
           // Begin forward
           // TODO: probably allow SSH port to be configured - it might not be on port 22!
           fwd_sock = create_connection("127.0.0.1", 22);
