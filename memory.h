@@ -142,6 +142,10 @@ int tResize(int len) {
     memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
     free(POINTER_LIST);
   }
+  else {
+    // List is being created for the first time - fill with zeros
+    memset(new_pointer_list, 0, len * sizeof(struct ptr_data));
+  }
 
   debug_print("Success\n");
 
