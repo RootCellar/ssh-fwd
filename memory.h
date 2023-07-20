@@ -125,7 +125,7 @@ size_t tGetSize(void* ptr) {
 int tResize(int len) {
 
   int allocs = tGetTotalAllocs();
-  debug_printf("Attempting to resize pointer list... %d -> %d\n", allocs, len);
+  debug_printf("Attempting to resize pointer list... %d -> %d\n", POINTER_LIST_SIZE, len);
   if(len < allocs) {
     debug_print("Refusing to allocate pointer list to be smaller than current number of allocations\n");
     return 1;
