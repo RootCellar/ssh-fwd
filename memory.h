@@ -133,6 +133,16 @@ int tResize(int len) {
     return 1;
   }
 
+  if(len <= 0) {
+    debug_print("Refusing size smaller than one...");
+    return 1;
+  }
+
+  if(len == POINTER_LIST_SIZE) {
+    debug_print("Sizes equal, doing nothing...");
+    return 0;
+  }
+
   void* new_pointer_list = malloc(len * sizeof(struct ptr_data));
   if(!is_valid_ptr(new_pointer_list)) {
     debug_print("Could not allocate new pointer list!");
