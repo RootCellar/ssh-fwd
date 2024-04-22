@@ -245,7 +245,7 @@ int main(int argc, char const *argv[])
   char buffer[BUFFER_SIZE] = {0};
   char *string;
 
-  struct client_data clients[CLIENT_LIST_SIZE];
+  struct client_data* clients = tMalloc(sizeof(struct client_data) * CLIENT_LIST_SIZE);
 
   for(int i = 0; i < CLIENT_LIST_SIZE; i++) {
     clients[i].connection_fd = -1;
