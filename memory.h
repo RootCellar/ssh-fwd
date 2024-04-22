@@ -175,7 +175,7 @@ int tAdd(void* ptr, unsigned long int len) {
 
 // Allocate memory for a pointer and return the pointer,
 // adding it to the tracked list if the memory allocation was successful
-void* tMalloc(unsigned long int len) {
+void* tMalloc(size_t len) {
   debug_printf("Allocating %lu bytes\n", len);
 
   if(len <= 0) {
