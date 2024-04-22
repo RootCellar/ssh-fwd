@@ -206,7 +206,7 @@ void* tMalloc(size_t len) {
 // if it is in the list and is a valid pointer
 int tFree(void* ptr) {
 
-  if(!is_valid_ptr(ptr)) return 0; // invalid pointer
+  if(!is_valid_ptr(ptr)) return 1; // invalid pointer
 
   debug_print("Attempting to free a pointer\n");
 
