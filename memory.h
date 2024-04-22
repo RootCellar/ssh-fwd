@@ -185,18 +185,21 @@ void* tMalloc(size_t len) {
 
   void* toRet = malloc(len);
 
-  if(is_valid_ptr(toRet)) {
-    debug_printf("Successfully allocated %lu bytes\n", len);
-    int failed = tAdd(toRet, len);
-    if(failed) {
-      debug_print("Could not add pointer to list!\n");
-      free(toRet);
-      toRet = 0;
-    }
-    else {
-      debug_print("Successfully added pointer to list\n");
-      tPrintStatus();
-    }
+  if(!is_valid_ptr(toRet)) {
+    debug_printf("Failed to allocate %lu bytes!\n", len);
+    return NULL;
+  }
+
+  debug_printf("Successfully allocated %lu bytes\n", len);
+  int failed = tAdd(toRet, len);
+  if(failed) {
+    debug_print("Could not add pointer to list!\n");
+    free(toRet);
+    toRet = NULL;
+  }
+  else {
+    debug_print("Successfully added pointer to list\n");
+    tPrintStatus();
   }
 
   return toRet;
