@@ -41,7 +41,7 @@ int tOwnsAddress(void* adr) {
   struct ptr_data* current;
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
 
-    if(POINTER_LIST[i].ptr > 0) {
+    if(is_valid_ptr(POINTER_LIST[i].ptr)) {
 
       current = &POINTER_LIST[i];
       if( (uintptr_t) current->ptr <= (uintptr_t) adr 
