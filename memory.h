@@ -57,7 +57,7 @@ int tOwnsAddress(void* adr) {
 }
 
 // Returns the number of allocations.
-// Could be used to see if a function leaks memory on it's own
+// Could be used to see if a function leaks memory on its own
 int tGetTotalAllocs() {
   if( !is_valid_ptr(POINTER_LIST) ) return 0;
 
