@@ -26,7 +26,7 @@ struct ptr_data {
   size_t size;
 };
 
-struct ptr_data* POINTER_LIST = 0;
+struct ptr_data* POINTER_LIST = NULL;
 int POINTER_LIST_SIZE = 0;
 
 int is_valid_ptr(void* ptr) {
@@ -180,7 +180,7 @@ void* tMalloc(unsigned long int len) {
 
   if(len <= 0) {
     debug_printf("Refusing to allocate %lu bytes", len);
-    return 0;
+    return NULL;
   }
 
   void* toRet = malloc(len);
@@ -222,7 +222,7 @@ int tFree(void* ptr) {
 
   // Free the pointer, remove it from the list
   free(ptr);
-  ptrData->ptr = 0;
+  ptrData->ptr = NULL;
   debug_printf("Freed %lu bytes\n", ptrData->size );
   tPrintStatus();
   return 0;
