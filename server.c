@@ -125,11 +125,7 @@ void handle_client_connections(struct client_data* clients) {
     if(errno == EAGAIN) {
       // Nothing
     }
-    else if(len == 0) {
-      debug_printf("Client %d disconnected.\n", i);
-      close_fd(clients, i);
-    }
-    else if(errno != 0) {
+    else if(len == 0 || errno != 0) {
       debug_printf("Client %d disconnected.\n", i);
       close_fd(clients, i);
     }
