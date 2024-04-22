@@ -224,6 +224,7 @@ int tFree(void* ptr) {
   free(ptr);
   ptrData->ptr = NULL;
   debug_printf("Freed %lu bytes\n", ptrData->size );
+  ptrData->size = 0;
   tPrintStatus();
   return 0;
 }
