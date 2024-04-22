@@ -242,7 +242,7 @@ int main(int argc, char const *argv[])
   struct sockaddr_in address;
   int opt = 1;
   int addrlen = sizeof(address);
-  char buffer[BUFFER_SIZE] = {0};
+  char* buffer = tMalloc(sizeof(char) * BUFFER_SIZE);
   char *string;
 
   struct client_data* clients = tMalloc(sizeof(struct client_data) * CLIENT_LIST_SIZE);
