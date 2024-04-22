@@ -2,21 +2,23 @@ CXX = gcc
 CXXFLAGS = -g -Wall
 LDFLAGS =
 
-SOURCES = $(wildcard *.cpp)
-HEADERS = $(wildcard *.hpp) $(wildcard *.h)
-OBJECTS = $(patsubst %.cpp,%.o,$(SOURCES))
-
+# Program names
 SERVERTARGET = server
 CLIENTTARGET = client
 
 .PHONY: all clean
 
+# Build client and server by default
 all: $(SERVERTARGET) $(CLIENTTARGET)
+
+# Cleans targets
 
 clean:
 	$(RM) server client
 
-server: server.c $(HEADERS)
+# Targets
+
+server: server.c
 	$(CXX) -o $@ server.c
 
 client: client.c $(HEADERS)

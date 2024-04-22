@@ -26,7 +26,7 @@ struct ptr_data {
   size_t size;
 };
 
-struct ptr_data* POINTER_LIST = 0;
+struct ptr_data* POINTER_LIST = NULL;
 int POINTER_LIST_SIZE = 0;
 
 int is_valid_ptr(void* ptr) {
@@ -41,7 +41,7 @@ int tOwnsAddress(void* adr) {
   struct ptr_data* current;
   for(int i = 0; i < POINTER_LIST_SIZE; i++) {
 
-    if(POINTER_LIST[i].ptr > 0) {
+    if(is_valid_ptr(POINTER_LIST[i].ptr)) {
 
       current = &POINTER_LIST[i];
       if( (uintptr_t) current->ptr <= (uintptr_t) adr 
@@ -57,7 +57,7 @@ int tOwnsAddress(void* adr) {
 }
 
 // Returns the number of allocations.
-// Could be used to see if a function leaks memory on it's own
+// Could be used to see if a function leaks memory on its own
 int tGetTotalAllocs() {
   if( !is_valid_ptr(POINTER_LIST) ) return 0;
 
@@ -113,10 +113,10 @@ int tFindSpot(void* ptr) {
 
 // Get the size of the given pointer.
 // Must be kept tracked of in the list.
-// Returns 0 if the size is zero or if the pointer is not found.
+// Returns -1 if the pointer is not found.
 size_t tGetSize(void* ptr) {
   int spot = tFindSpot(ptr);
-  if(spot < 0) { return 0; }
+  if(spot < 0) { return -1; }
 
   return POINTER_LIST[spot].size;
 }
@@ -199,23 +199,26 @@ void* tMalloc(unsigned long int len) {
 
   if(len <= 0) {
     debug_printf("Refusing to allocate %lu bytes", len);
-    return 0;
+    return NULL;
   }
 
   void* toRet = malloc(len);
 
-  if(is_valid_ptr(toRet)) {
-    debug_printf("Successfully allocated %lu bytes", len);
-    int failed = tAdd(toRet, len);
-    if(failed) {
-      debug_print("Could not add pointer to list!");
-      free(toRet);
-      toRet = 0;
-    }
-    else {
-      debug_print("Successfully added pointer to list");
-      tPrintStatus();
-    }
+  if(!is_valid_ptr(toRet)) {
+    debug_printf("Failed to allocate %lu bytes!\n", len);
+    return NULL;
+  }
+
+  debug_printf("Successfully allocated %lu bytes\n", len);
+  int failed = tAdd(toRet, len);
+  if(failed) {
+    debug_print("Could not add pointer to list!\n");
+    free(toRet);
+    toRet = NULL;
+  }
+  else {
+    debug_print("Successfully added pointer to list\n");
+    tPrintStatus();
   }
 
   return toRet;
@@ -225,7 +228,7 @@ void* tMalloc(unsigned long int len) {
 // if it is in the list and is a valid pointer
 int tFree(void* ptr) {
 
-  if(!is_valid_ptr(ptr)) return 0; // invalid pointer
+  if(!is_valid_ptr(ptr)) return 1; // invalid pointer
 
   debug_print("Attempting to free a pointer");
 
@@ -241,8 +244,9 @@ int tFree(void* ptr) {
 
   // Free the pointer, remove it from the list
   free(ptr);
-  ptrData->ptr = 0;
-  debug_printf("Freed %lu bytes", ptrData->size );
+  ptrData->ptr = NULL;
+  debug_printf("Freed %lu bytes\n", ptrData->size );
+  ptrData->size = 0;
   tPrintStatus();
   return 0;
 }
