@@ -214,12 +214,11 @@ void* tMalloc(unsigned long int len) {
   if(failed) {
     debug_print("Could not add pointer to list!\n");
     free(toRet);
-    toRet = NULL;
+    return NULL;
   }
-  else {
-    debug_print("Successfully added pointer to list\n");
-    tPrintStatus();
-  }
+  
+  debug_print("Successfully added pointer to list\n");
+  tPrintStatus();
 
   return toRet;
 }
