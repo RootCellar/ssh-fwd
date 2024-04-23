@@ -205,19 +205,19 @@ void* tMalloc(unsigned long int len) {
   void* toRet = malloc(len);
 
   if(!is_valid_ptr(toRet)) {
-    debug_printf("Failed to allocate %lu bytes!\n", len);
+    debug_printf("Failed to allocate %lu bytes!", len);
     return NULL;
   }
 
-  debug_printf("Successfully allocated %lu bytes\n", len);
+  debug_printf("Successfully allocated %lu bytes", len);
   int failed = tAdd(toRet, len);
   if(failed) {
-    debug_print("Could not add pointer to list!\n");
+    debug_print("Could not add pointer to list!");
     free(toRet);
     return NULL;
   }
   
-  debug_print("Successfully added pointer to list\n");
+  debug_print("Successfully added pointer to list");
   tPrintStatus();
 
   return toRet;
@@ -244,7 +244,7 @@ int tFree(void* ptr) {
   // Free the pointer, remove it from the list
   free(ptr);
   ptrData->ptr = NULL;
-  debug_printf("Freed %lu bytes\n", ptrData->size );
+  debug_printf("Freed %lu bytes", ptrData->size );
   ptrData->size = 0;
   tPrintStatus();
   return 0;
