@@ -167,6 +167,8 @@ int tResize(int len) {
 
   POINTER_LIST_SIZE = len;
   POINTER_LIST = new_pointer_list;
+
+  tPrintStatus();
   return 0;
 }
 
