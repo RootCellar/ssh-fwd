@@ -178,8 +178,9 @@ int tResize(unsigned long int len) {
 
   if(is_valid_ptr(POINTER_LIST)) {
     debug_print("Replacing old pointer list...");
-    
-    memcpy(new_pointer_list, POINTER_LIST, POINTER_LIST_SIZE);
+    tCondense();
+    unsigned long int copy_length = len < POINTER_LIST_SIZE ? len : POINTER_LIST_SIZE;
+    memcpy(new_pointer_list, POINTER_LIST, copy_length);
     free(POINTER_LIST);
   }
   else {
