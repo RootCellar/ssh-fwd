@@ -131,7 +131,11 @@ void tCondense() {
 
   long int new_spot = tFindSpot(0);
   if(new_spot < 0) return;
-  for(long int i = 0; i < POINTER_LIST_SIZE; i++) {
+  
+  long int i = 0;
+  while( is_valid_ptr(POINTER_LIST[i].ptr) ) i++;
+  
+  for(; i < POINTER_LIST_SIZE; i++) {
     if(is_valid_ptr(POINTER_LIST[i].ptr)) {
       POINTER_LIST[new_spot].ptr = POINTER_LIST[i].ptr;
       POINTER_LIST[new_spot].size = POINTER_LIST[i].size;
