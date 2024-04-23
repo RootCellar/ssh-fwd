@@ -27,7 +27,7 @@ struct ptr_data {
 };
 
 struct ptr_data* POINTER_LIST = NULL;
-unsigned long int POINTER_LIST_SIZE = 0;
+long int POINTER_LIST_SIZE = 0;
 
 int is_valid_ptr(void* ptr) {
   return ptr > 0;
@@ -39,7 +39,7 @@ int tOwnsAddress(void* adr) {
   if( !is_valid_ptr(POINTER_LIST) ) return 0;
 
   struct ptr_data* current;
-  for(unsigned long int i = 0; i < POINTER_LIST_SIZE; i++) {
+  for(long int i = 0; i < POINTER_LIST_SIZE; i++) {
 
     if(is_valid_ptr(POINTER_LIST[i].ptr)) {
 
@@ -58,13 +58,13 @@ int tOwnsAddress(void* adr) {
 
 // Returns the number of allocations.
 // Could be used to see if a function leaks memory on its own
-unsigned long int tGetTotalAllocs() {
+long int tGetTotalAllocs() {
   if( !is_valid_ptr(POINTER_LIST) ) return 0;
 
-  unsigned long int count = 0;
+  long int count = 0;
   debug_print("Counting all pointers...");
 
-  for(unsigned long int i = 0; i < POINTER_LIST_SIZE; i++) {
+  for(long int i = 0; i < POINTER_LIST_SIZE; i++) {
     if(is_valid_ptr(POINTER_LIST[i].ptr)) {
       debug_printf("Found pointer in slot %lu", i);
       count += 1;
@@ -80,7 +80,7 @@ unsigned long int tGetTotalAllocSize() {
   unsigned long int sum = 0;
   debug_print("Finding total size of all pointers...");
 
-  for(unsigned long int i = 0; i < POINTER_LIST_SIZE; i++) {
+  for(long int i = 0; i < POINTER_LIST_SIZE; i++) {
     if(POINTER_LIST[i].ptr > 0) {
       debug_printf("Found pointer in slot %lu", i);
       sum += POINTER_LIST[i].size;
@@ -98,11 +98,11 @@ void tPrintStatus() {
 // Find the given pointer.
 // Handy trick: tFindSpot(0) can be used to find an empty slot
 // to track a new pointer
-unsigned long int tFindSpot(void* ptr) {
+long int tFindSpot(void* ptr) {
   if( !is_valid_ptr(POINTER_LIST) ) return -1;
 
   debug_printf("Finding pointer %p", ptr);
-  for(unsigned long int i = 0; i < POINTER_LIST_SIZE; i++) {
+  for(long int i = 0; i < POINTER_LIST_SIZE; i++) {
     if(POINTER_LIST[i].ptr == ptr) {
       debug_printf("Found pointer in slot %lu", i);
       return i;
@@ -116,7 +116,7 @@ unsigned long int tFindSpot(void* ptr) {
 // Must be kept tracked of in the list.
 // Returns -1 if the pointer is not found.
 size_t tGetSize(void* ptr) {
-  unsigned long int spot = tFindSpot(ptr);
+  long int spot = tFindSpot(ptr);
   if(spot < 0) { return -1; }
 
   return POINTER_LIST[spot].size;
@@ -129,9 +129,9 @@ size_t tGetSize(void* ptr) {
 void tCondense() {
   debug_print("Condensing list...");
 
-  unsigned long int new_spot = tFindSpot(0);
+  long int new_spot = tFindSpot(0);
   if(new_spot < 0) return;
-  for(unsigned long int i = 0; i < POINTER_LIST_SIZE; i++) {
+  for(long int i = 0; i < POINTER_LIST_SIZE; i++) {
     if(is_valid_ptr(POINTER_LIST[i].ptr)) {
       POINTER_LIST[new_spot].ptr = POINTER_LIST[i].ptr;
       POINTER_LIST[new_spot].size = POINTER_LIST[i].size;
@@ -151,9 +151,9 @@ void tCondense() {
    
    Returns 0 if successful, 1 if there was a failure
 */
-int tResize(unsigned long int len) {
+int tResize(long int len) {
 
-  unsigned long int allocs = tGetTotalAllocs();
+  long int allocs = tGetTotalAllocs();
   debug_printf("Attempting to resize pointer list... %lu -> %lu", POINTER_LIST_SIZE, len);
   if(len < allocs) {
     debug_print("Refusing to allocate pointer list to be smaller than current number of allocations");
@@ -179,7 +179,7 @@ int tResize(unsigned long int len) {
   if(is_valid_ptr(POINTER_LIST)) {
     debug_print("Replacing old pointer list...");
     tCondense();
-    unsigned long int copy_length = len < POINTER_LIST_SIZE ? len : POINTER_LIST_SIZE;
+    long int copy_length = len < POINTER_LIST_SIZE ? len : POINTER_LIST_SIZE;
     memcpy(new_pointer_list, POINTER_LIST, copy_length);
     free(POINTER_LIST);
   }
@@ -208,7 +208,7 @@ int tAdd(void* ptr, unsigned long int len) {
     }
   }
 
-  unsigned long int spot = tFindSpot(0);
+  long int spot = tFindSpot(0);
   if(spot < 0) {
     return 1;
   }
@@ -261,7 +261,7 @@ int tFree(void* ptr) {
 
   // Find the pointer in the list
   // if we don't have it, then we don't manage it
-  unsigned long int spot = tFindSpot(ptr);
+  long int spot = tFindSpot(ptr);
   if(spot < 0) {
     debug_print("Could not find pointer in list!");
     return 1;
